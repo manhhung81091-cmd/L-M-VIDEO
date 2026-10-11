@@ -1,0 +1,42 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 720
+PlayResY: 1280
+WrapStyle: 0
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Sub,Baloo 2 ExtraBold,46,&H00FFFFFF,&H00FFFFFF,&H00602A8C,&H64000000,0,0,0,0,100,100,0,0,1,4,2,2,50,50,330,1
+Style: Speaker,Baloo 2 ExtraBold,34,&H00FFFFFF,&H00FFFFFF,&H00FFFFFF,&H64000000,0,0,0,0,100,100,0,0,1,3,1,2,50,50,330,1
+Style: Title,Baloo 2 ExtraBold,62,&H00FFFFFF,&H00FFFFFF,&H00B469FF,&H64000000,0,0,0,0,100,100,1,0,1,6,3,8,40,40,150,1
+Style: Channel,Baloo 2 ExtraBold,34,&H00B469FF,&H00FFFFFF,&H00FFFFFF,&H64000000,0,0,0,0,100,100,1,0,1,4,1,8,40,40,95,1
+Style: End,Baloo 2 ExtraBold,50,&H00FFFFFF,&H00FFFFFF,&H00B469FF,&H64000000,0,0,0,0,100,100,0,0,1,5,2,5,40,40,0,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 1,0:00:00.30,0:00:04.30,Channel,,0,0,0,,{\fad(300,300)}★ Nhà Có Em Bé ★
+Dialogue: 1,0:00:00.40,0:00:04.30,Title,,0,0,0,,{\fad(300,300)}BÉ SAO TỰ ĐI VỆ SINH
+Dialogue: 2,0:00:00.25,0:00:02.37,Speaker,,0,0,0,,{\fad(150,150)\pos(360,815)\an2\3c&H00B469FF\bord6}Mẹ
+Dialogue: 2,0:00:00.25,0:00:02.37,Sub,,0,0,0,,{\fad(150,150)\t(0,180,\fscx106\fscy106)\t(180,320,\fscx100\fscy100)}Hôm nay Bé Sao đi học có ổn không nhỉ?
+Dialogue: 2,0:00:02.42,0:00:04.54,Speaker,,0,0,0,,{\fad(150,150)\pos(360,815)\an2\3c&H00B469FF\bord6}Mẹ
+Dialogue: 2,0:00:02.42,0:00:04.54,Sub,,0,0,0,,{\fad(150,150)\t(0,180,\fscx106\fscy106)\t(180,320,\fscx100\fscy100)}Không biết con có tự đi vệ sinh được không...
+Dialogue: 2,0:00:04.89,0:00:09.18,Speaker,,0,0,0,,{\fad(150,150)\pos(360,815)\an2\3c&H0000C8FF\bord6}Bé Sao
+Dialogue: 2,0:00:04.89,0:00:09.18,Sub,,0,0,0,,{\fad(150,150)\t(0,180,\fscx106\fscy106)\t(180,320,\fscx100\fscy100)}Ơ... giấy này dùng thế nào nhỉ?
+Dialogue: 2,0:00:09.53,0:00:11.65,Speaker,,0,0,0,,{\fad(150,150)\pos(360,815)\an2\3c&H00B469FF\bord6}Mẹ
+Dialogue: 2,0:00:09.53,0:00:11.65,Sub,,0,0,0,,{\fad(150,150)\t(0,180,\fscx106\fscy106)\t(180,320,\fscx100\fscy100)}Con nhớ nhé: gấp giấy lại, lau nhẹ từ trước ra sau.
+Dialogue: 2,0:00:11.70,0:00:13.83,Speaker,,0,0,0,,{\fad(150,150)\pos(360,815)\an2\3c&H0000C8FF\bord6}Bé Sao
+Dialogue: 2,0:00:11.70,0:00:13.83,Sub,,0,0,0,,{\fad(150,150)\t(0,180,\fscx106\fscy106)\t(180,320,\fscx100\fscy100)}Dạ, con nhớ rồi ạ!
+Dialogue: 2,0:00:14.18,0:00:18.47,Speaker,,0,0,0,,{\fad(150,150)\pos(360,815)\an2\3c&H00B469FF\bord6}Mẹ
+Dialogue: 2,0:00:14.18,0:00:18.47,Sub,,0,0,0,,{\fad(150,150)\t(0,180,\fscx106\fscy106)\t(180,320,\fscx100\fscy100)}Và nhớ rửa tay với xà phòng thật sạch nha!
+Dialogue: 2,0:00:18.82,0:00:23.11,Speaker,,0,0,0,,{\fad(150,150)\pos(360,815)\an2\3c&H0000C8FF\bord6}Bé Sao
+Dialogue: 2,0:00:18.82,0:00:23.11,Sub,,0,0,0,,{\fad(150,150)\t(0,180,\fscx106\fscy106)\t(180,320,\fscx100\fscy100)}À đúng rồi! Gấp giấy... lau từ trước ra sau!
+Dialogue: 2,0:00:23.46,0:00:27.75,Speaker,,0,0,0,,{\fad(150,150)\pos(360,815)\an2\3c&H00E6A04B\bord6}Cô giáo
+Dialogue: 2,0:00:23.46,0:00:27.75,Sub,,0,0,0,,{\fad(150,150)\t(0,180,\fscx106\fscy106)\t(180,320,\fscx100\fscy100)}Sao giỏi quá! Con tự làm được rồi đấy!
+Dialogue: 2,0:00:28.10,0:00:30.22,Speaker,,0,0,0,,{\fad(150,150)\pos(360,815)\an2\3c&H0000C8FF\bord6}Bé Sao
+Dialogue: 2,0:00:28.10,0:00:30.22,Sub,,0,0,0,,{\fad(150,150)\t(0,180,\fscx106\fscy106)\t(180,320,\fscx100\fscy100)}Mẹ ơi! Hôm nay con tự đi vệ sinh được rồi!
+Dialogue: 2,0:00:30.27,0:00:32.39,Speaker,,0,0,0,,{\fad(150,150)\pos(360,815)\an2\3c&H00B469FF\bord6}Mẹ
+Dialogue: 2,0:00:30.27,0:00:32.39,Sub,,0,0,0,,{\fad(150,150)\t(0,180,\fscx106\fscy106)\t(180,320,\fscx100\fscy100)}Ôi, con gái mẹ giỏi quá!
+Dialogue: 2,0:00:32.74,0:00:37.03,Speaker,,0,0,0,,{\fad(150,150)\pos(360,815)\an2\3c&H00B469FF\bord6}Mẹ
+Dialogue: 2,0:00:32.74,0:00:37.03,Sub,,0,0,0,,{\fad(150,150)\t(0,180,\fscx106\fscy106)\t(180,320,\fscx100\fscy100)}Mẹ tự hào về con lắm, Bé Sao ạ!
+Dialogue: 1,0:00:37.43,0:00:42.18,End,,0,0,0,,{\fad(400,0)\pos(360,760)}Mỗi ngày bé lớn thêm một chút ♥\N{\fs40\3c&H00602A8C&}Theo dõi kênh Nhà Có Em Bé nhé!

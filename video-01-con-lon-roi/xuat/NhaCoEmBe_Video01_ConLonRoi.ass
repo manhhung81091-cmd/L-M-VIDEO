@@ -1,0 +1,33 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+WrapStyle: 0
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Sub,Baloo 2 SemiBold,68,&H00FFFFFF,&H00FFFFFF,&H00302830,&H78000000,0,0,0,0,100,100,0,0,1,4.5,2,2,120,120,470,1
+Style: Nhan,Baloo 2 ExtraBold,58,&H00FFFFFF,&H00FFFFFF,&H00602A8C,&H50000000,0,0,0,0,100,100,2,0,1,5,1.5,2,120,120,650,1
+Style: Kenh,Baloo 2 ExtraBold,104,&H00FFFFFF,&H00FFFFFF,&H00602A8C,&H50000000,0,0,0,0,100,100,4,0,1,7,3,8,80,80,560,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 1,0:00:00.15,0:00:04.88,Nhan,,0,0,0,,{\fad(220,160)}TỪ NGÀY CON ĐI MẪU GIÁO…
+Dialogue: 2,0:00:00.07,0:00:03.40,Sub,,0,0,0,,Từ ngày con đi mẫu giáo, mẹ mới nhận ra…
+Dialogue: 1,0:00:05.15,0:00:08.88,Nhan,,0,0,0,,{\fad(220,160)}MẸ KHÔNG THỂ LÀM THAY MÃI
+Dialogue: 2,0:00:05.22,0:00:08.15,Sub,,0,0,0,,Có những việc mẹ không thể làm thay con mãi.
+Dialogue: 1,0:00:09.15,0:00:13.88,Nhan,,0,0,0,,{\fad(220,160)}DẠY CON TỪNG CHÚT MỘT
+Dialogue: 2,0:00:09.22,0:00:12.47,Sub,,0,0,0,,Ở nhà, mẹ kiên nhẫn dạy con từng chút một.
+Dialogue: 1,0:00:14.15,0:00:17.88,Nhan,,0,0,0,,{\fad(220,160)}TỰ RỬA TAY
+Dialogue: 2,0:00:14.22,0:00:15.91,Sub,,0,0,0,,Từ việc tự rửa tay…
+Dialogue: 1,0:00:18.15,0:00:22.88,Nhan,,0,0,0,,{\fad(220,160)}THÓI QUEN NHỎ MỖI NGÀY
+Dialogue: 2,0:00:18.22,0:00:21.01,Sub,,0,0,0,,Đến những thói quen vệ sinh nhỏ mỗi ngày.
+Dialogue: 1,0:00:23.15,0:00:27.88,Nhan,,0,0,0,,{\fad(220,160)}CON TỰ TIN HƠN MỖI NGÀY
+Dialogue: 2,0:00:23.22,0:00:26.76,Sub,,0,0,0,,Con dần biết tự làm, và nhờ cô giúp khi cần.
+Dialogue: 1,0:00:28.15,0:00:32.88,Nhan,,0,0,0,,{\fad(220,160)}CON KHÔNG CẦN GIỎI NGAY
+Dialogue: 2,0:00:28.22,0:00:30.94,Sub,,0,0,0,,Con không cần giỏi ngay đâu, con yêu.
+Dialogue: 1,0:00:33.15,0:00:39.33,Nhan,,0,0,0,,{\fad(220,160)}MẸ LUÔN ĐỒNG HÀNH CÙNG CON
+Dialogue: 2,0:00:33.22,0:00:36.73,Sub,,0,0,0,,Chỉ cần mỗi ngày, con tự lập thêm một chút.
+Dialogue: 2,0:00:36.77,0:00:39.21,Sub,,0,0,0,,Mẹ sẽ luôn đồng hành cùng con.
+Dialogue: 1,0:00:39.60,0:00:42.45,Kenh,,0,0,0,,{\fad(450,0)}NHÀ CÓ EM BÉ

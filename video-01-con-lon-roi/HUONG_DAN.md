@@ -7,7 +7,7 @@ Kênh TikTok **Nhà Có Em Bé**. Video dọc 9:16, 1080×1920, 30fps, dài 42,4
 | File | Dùng để |
 |---|---|
 | `NhaCoEmBe_Video01_ConLonRoi.mp4` | Video hoàn chỉnh, đăng thẳng lên TikTok |
-| `NhaCoEmBe_Video01_ConLonRoi.srt` | Phụ đề, nhập được vào CapCut |
+| `NhaCoEmBe_Video01_ConLonRoi.srt` | Phụ đề lời đọc (video hiện chỉ để chữ nhấn; file này để dự phòng) |
 | `timeline.csv` | Bảng thời gian từng cảnh |
 | `stems/giong_doc.wav` | Giọng đọc liền mạch, đã căn đúng mốc thời gian |
 | `stems/nhac_nen.wav` | Nhạc piano nền, chưa giảm âm |

@@ -23,6 +23,7 @@ LEAD_FIRST = 0.15
 TAIL = 0.55     # nghỉ sau lời đọc trước khi cắt
 MUSIC_DB = -21  # nhạc nền so với giọng (trước ducking)
 SFX_DB = -24    # tiếng nước cảnh 04 (rất nhỏ)
+SHOW_SUB = False  # False = chỉ hiện chữ nhấn, không hiện dòng phụ đề lời đọc (vẫn xuất .srt)
 
 
 def run(cmd):
@@ -132,7 +133,8 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         span = end_all - t
         for p in parts:
             d = span * len(p) / total_chars
-            ev.append(f"Dialogue: 2,{ts_ass(t)},{ts_ass(t + d - 0.04)},Sub,,0,0,0,,{p}")
+            if SHOW_SUB:
+                ev.append(f"Dialogue: 2,{ts_ass(t)},{ts_ass(t + d - 0.04)},Sub,,0,0,0,,{p}")
             srt.append((t, t + d - 0.04, p))
             t += d
     with open(ass_path, "w", encoding="utf-8") as fh:

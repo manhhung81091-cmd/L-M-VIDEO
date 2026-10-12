@@ -1,0 +1,21 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+WrapStyle: 0
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Sub,Baloo 2 ExtraBold,70,&H00FFFFFF,&H00FFFFFF,&H00302830,&H78000000,0,0,0,0,100,100,0,0,1,5,2,2,120,120,500,1
+Style: Hoi,Baloo 2 ExtraBold,84,&H00FFFFFF,&H00FFFFFF,&H00602A8C,&H50000000,0,0,0,0,100,100,0,0,1,7,3,2,90,90,520,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 2,0:00:00.00,0:00:02.08,Sub,,0,0,0,,{\fad(80,80)\t(0,140,\fscx104\fscy104)\t(140,260,\fscx100\fscy100)}Mẹ ơi… sao hôm nay mẹ không cười?
+Dialogue: 2,0:00:03.20,0:00:05.31,Sub,,0,0,0,,{\fad(80,80)\t(0,140,\fscx104\fscy104)\t(140,260,\fscx100\fscy100)}Mẹ chỉ hơi mệt một chút thôi con.
+Dialogue: 2,0:00:07.20,0:00:09.19,Sub,,0,0,0,,{\fad(80,80)\t(0,140,\fscx104\fscy104)\t(140,260,\fscx100\fscy100)}Mẹ ngồi đây nhé! Con có cái này!
+Dialogue: 2,0:00:11.20,0:00:13.30,Sub,,0,0,0,,{\fad(80,80)\t(0,140,\fscx104\fscy104)\t(140,260,\fscx100\fscy100)}Mẹ uống nước đi, cho đỡ mệt ạ!
+Dialogue: 2,0:00:14.70,0:00:16.67,Sub,,0,0,0,,{\fad(80,80)\t(0,140,\fscx104\fscy104)\t(140,260,\fscx100\fscy100)}Ôi, ai dạy con quan tâm mẹ thế?
+Dialogue: 2,0:00:16.67,0:00:17.85,Sub,,0,0,0,,{\fad(80,80)\t(0,140,\fscx104\fscy104)\t(140,260,\fscx100\fscy100)}Mẹ dạy con mà!
+Dialogue: 2,0:00:19.20,0:00:22.39,Sub,,0,0,0,,{\fad(80,80)\t(0,140,\fscx104\fscy104)\t(140,260,\fscx100\fscy100)}Hóa ra, những điều mẹ dạy con mỗi ngày… con đều ghi nhớ.

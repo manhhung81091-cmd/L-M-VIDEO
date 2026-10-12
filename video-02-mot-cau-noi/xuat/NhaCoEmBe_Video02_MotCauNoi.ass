@@ -1,0 +1,22 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+WrapStyle: 0
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Sub,Baloo 2 ExtraBold,70,&H00FFFFFF,&H00FFFFFF,&H00302830,&H78000000,0,0,0,0,100,100,0,0,1,5,2,2,120,120,500,1
+Style: Hoi,Baloo 2 ExtraBold,84,&H00FFFFFF,&H00FFFFFF,&H00602A8C,&H50000000,0,0,0,0,100,100,0,0,1,7,3,2,90,90,520,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 2,0:00:00.00,0:00:02.08,Sub,,0,0,0,,{\fad(80,80)\t(0,140,\fscx104\fscy104)\t(140,260,\fscx100\fscy100)}Mẹ ơi! Hôm nay con tự làm được rồi!
+Dialogue: 2,0:00:02.08,0:00:03.07,Sub,,0,0,0,,{\fad(80,80)\t(0,140,\fscx104\fscy104)\t(140,260,\fscx100\fscy100)}Thật á con?
+Dialogue: 2,0:00:03.37,0:00:04.60,Sub,,0,0,0,,{\fad(80,80)\t(0,140,\fscx104\fscy104)\t(140,260,\fscx100\fscy100)}Con tự rửa tay…
+Dialogue: 2,0:00:07.37,0:00:09.02,Sub,,0,0,0,,{\fad(80,80)\t(0,140,\fscx104\fscy104)\t(140,260,\fscx100\fscy100)}Con còn tự lấy giấy nữa!
+Dialogue: 2,0:00:11.37,0:00:13.15,Sub,,0,0,0,,{\fad(80,80)\t(0,140,\fscx104\fscy104)\t(140,260,\fscx100\fscy100)}Ôi, con gái mẹ giỏi quá!
+Dialogue: 2,0:00:13.15,0:00:15.10,Sub,,0,0,0,,{\fad(80,80)\t(0,140,\fscx104\fscy104)\t(140,260,\fscx100\fscy100)}Mai con còn tự làm nữa cơ!
+Dialogue: 2,0:00:16.37,0:00:19.40,Sub,,0,0,0,,{\fad(80,80)\t(0,140,\fscx104\fscy104)\t(140,260,\fscx100\fscy100)}Hóa ra, con lớn lên từ những điều nhỏ xíu như thế.
+Dialogue: 3,0:00:20.27,0:00:23.17,Hoi,,0,0,0,,{\fad(350,0)}Con nhà bạn đã biết\Ntự làm việc gì rồi?

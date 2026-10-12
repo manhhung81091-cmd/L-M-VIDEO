@@ -51,12 +51,14 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--dur", type=float, required=True)
     ap.add_argument("--warm-from", type=float, default=1e9)
+    ap.add_argument("--bpm", type=float, default=BPM)
     args = ap.parse_args()
+    beat = 60 / args.bpm
 
     n = int((args.dur + 4) * SR)
     L = np.zeros(n)
     R = np.zeros(n)
-    bar = 4 * BEAT
+    bar = 4 * beat
     t0, ci, mi = 0.0, 0, 0
     rng = np.random.default_rng(7)
     while t0 < args.dur + 1:
@@ -73,13 +75,13 @@ def main():
         R[i0:i0 + len(b)] += b[: n - i0]
         if t0 >= args.warm_from:
             b2 = piano(midi_hz(root + 7), 3.0, 0.12)
-            j = int((t0 + 2 * BEAT) * SR)
+            j = int((t0 + 2 * beat) * SR)
             L[j:j + len(b2)] += b2[: max(0, n - j)]
             R[j:j + len(b2)] += b2[: max(0, n - j)]
         # rải 8 nốt móc đơn
         order = [0, 1, 2, 3, 2, 1, 2, 1]
         for k, o in enumerate(order):
-            ts = t0 + k * BEAT / 2 + rng.uniform(-0.008, 0.008)
+            ts = t0 + k * beat / 2 + rng.uniform(-0.008, 0.008)
             s = piano(midi_hz(notes[o]), 2.5, 0.16 + 0.03 * (k % 4 == 0))
             j = int(ts * SR)
             pan = 0.35 + 0.3 * (o / 3)
@@ -92,7 +94,7 @@ def main():
                 mi += 1
                 if m:
                     s = piano(midi_hz(m), 2.8, 0.22)
-                    j = int((t0 + k * BEAT) * SR)
+                    j = int((t0 + k * beat) * SR)
                     L[j:j + len(s)] += 0.55 * s[: max(0, n - j)]
                     R[j:j + len(s)] += 0.45 * s[: max(0, n - j)]
         t0 += bar

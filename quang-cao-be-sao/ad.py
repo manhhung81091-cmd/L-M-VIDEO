@@ -5,8 +5,8 @@
 
 Cấu trúc:
   A. Clip bé (hook) + chữ mở đầu; sản phẩm "bay" vào góc như sticker.
-  B. Sản phẩm phóng to ra giữa trên nền hồng mờ; tên thương hiệu; 3 huy hiệu
-     lấy NGUYÊN từ nhãn chai (Dịu nhẹ an toàn / pH 5.5 cân bằng / Hương thơm dễ chịu).
+  B. Sản phẩm phóng to ra giữa trên nền hồng mờ; logo Bé Sao thật (cắt từ ảnh
+     sản phẩm, --logo); 2 huy hiệu theo nhãn chai (Dịu nhẹ an toàn / Hương thơm dễ chịu).
   C. Lời kêu gọi đặt mua.
 Mọi lời quảng cáo chỉ dùng thông tin in trên nhãn sản phẩm.
 """
@@ -31,15 +31,15 @@ PINK_L = (255, 214, 230)
 BLUE = (22, 130, 220)
 WHITE = (255, 255, 255)
 
-# Lời đọc (giọng mẹ). "pH 5.5" viết theo cách đọc để giọng AI đọc đúng.
+# Lời đọc (giọng mẹ).
 VO = [
     ("a", "Con gái mình giờ đã tự giữ vệ sinh sạch sẽ mỗi ngày."),
     ("b", "Bọt vệ sinh Bé Sao. Dịu nhẹ cho bé, sạch thơm mỗi ngày."),
-    ("c", "Pê hát năm phẩy năm cân bằng, hương thơm dễ chịu."),
+    ("c", "Hương thơm dễ chịu."),
     ("d", "Mẹ đặt ngay cho bé nhé!"),
 ]
 HOOK = "Bé tự giữ vệ sinh\nmỗi ngày rồi nè!"
-BADGES = [("Dịu nhẹ", "an toàn"), ("pH 5.5", "cân bằng"), ("Hương thơm", "dễ chịu")]
+BADGES = [("Dịu nhẹ", "an toàn"), ("Hương thơm", "dễ chịu")]
 CTA = "Mẹ đặt ngay cho bé nhé!"
 
 
@@ -131,6 +131,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--clip", required=True)
     ap.add_argument("--product", required=True, help="PNG sản phẩm đã tách nền")
+    ap.add_argument("--logo", required=True, help="PNG logo Bé Sao (nền trong suốt)")
     ap.add_argument("--model", required=True, help="giọng Piper .onnx")
     ap.add_argument("--out", required=True)
     ap.add_argument("--name", default="BeSao_QuangCao_BotVeSinh")
@@ -153,9 +154,7 @@ def main():
     total = td + d["d"] + 1.3
     vo_starts = {"a": ta, "b": tb, "c": tc, "d": td}
     b_text = VO[1][1]
-    t_badge = [tb + d["b"] * (b_text.index("Dịu") / len(b_text)),
-               tc,
-               tc + d["c"] * 0.55]
+    t_badge = [tb + d["b"] * (b_text.index("Dịu") / len(b_text)), tc]
     t_cta = td - 0.15
 
     # --- tài nguyên hình ---
@@ -190,6 +189,24 @@ def main():
     bg_b = last.copy()
     bg_b.alpha_composite(pink)
     halo = glow_disc(900, (255, 255, 255, 200), 60)
+
+    # logo thật + viền trắng cho nổi trên nền hồng
+    logo = Image.open(args.logo).convert("RGBA")
+    lw = 780
+    logo = logo.resize((lw, int(logo.height * lw / logo.width)), Image.LANCZOS)
+    pad = 24
+    a = Image.new("L", (logo.width + 2 * pad, logo.height + 2 * pad), 0)
+    a.paste(logo.getchannel("A"), (pad, pad))
+    outline = a.filter(ImageFilter.MaxFilter(21)).filter(ImageFilter.GaussianBlur(1.5))
+    shadow = a.filter(ImageFilter.MaxFilter(21)).filter(ImageFilter.GaussianBlur(10))
+    logo_fx = Image.new("RGBA", a.size, (0, 0, 0, 0))
+    sh = Image.new("RGBA", a.size, (200, 60, 120, 0))
+    sh.putalpha(shadow.point(lambda v: int(v * 0.35)))
+    logo_fx.alpha_composite(sh, (0, 6))
+    wt = Image.new("RGBA", a.size, WHITE + (0,))
+    wt.putalpha(outline)
+    logo_fx.alpha_composite(wt)
+    logo_fx.alpha_composite(logo, (pad, pad))
 
     rng = np.random.default_rng(3)
     sparks = [(rng.uniform(40, W - 40), rng.uniform(150, 1500), rng.uniform(10, 26),
@@ -262,13 +279,13 @@ def main():
             layer = Image.new("RGBA", (W, 420), (0, 0, 0, 0))
             ld = ImageDraw.Draw(layer)
             text_center(ld, W / 2, 10, "Bọt vệ sinh", f_small, PINK, WHITE, 6)
-            text_center(ld, W / 2, 70, "Bé Sao", f_brand, BLUE, WHITE, 12)
+            layer.alpha_composite(logo_fx, (int((W - logo_fx.width) / 2), 92))
             s = max(0.01, k)
             layer = layer.resize((max(1, int(W * s)), max(1, int(420 * s))))
             paste_center(frame, layer, W / 2, 330)
             for (x, y, r, ph0, sp) in sparks:
                 a = 0.5 + 0.5 * math.sin(t * sp + ph0)
-                if a > 0.35 and not (pk_cx - 260 < x < pk_cx + 260 and 520 < y < 1480):
+                if a > 0.35 and y > 460 and not (pk_cx - 260 < x < pk_cx + 260 and 520 < y < 1480):
                     sparkle(draw, x, y + 6 * math.sin(t + ph0), r * a, (255, 214, 64, int(255 * a)))
             for i, (l1, l2) in enumerate(BADGES):
                 if t >= t_badge[i]:
@@ -285,7 +302,7 @@ def main():
                     pd.text((98, 84), l2, font=f_b2, fill=(90, 70, 90))
                     s = max(0.01, k)
                     pill = pill.resize((max(1, int(pill.width * s)), max(1, int(pill.height * s))))
-                    paste_center(frame, pill, 768, 740 + i * 200)
+                    paste_center(frame, pill, 768, 820 + i * 220)
 
         # ----- phần C: lời kêu gọi -----
         if t >= t_cta:

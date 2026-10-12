@@ -1,1 +1,6 @@
 __pycache__/
+# Video/âm thanh thành phẩm không lưu vào git
+*.mp4
+*.mov
+*.wav
+*.mp3

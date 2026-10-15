@@ -98,6 +98,37 @@ def wrap(d, text, fnt, maxw):
     return "\n".join(lines)
 
 
+def reveal(frame, txt, fnt, cx, y, t0, t1, tt, fill, stroke, sw, spacing=10, fade=0.22, rise=14):
+    """Vẽ chữ hiện TỪ TỪ từng chữ: chữ thứ i xuất hiện tại t0 + (t1-t0)*vị_trí/độ_dài,
+    mờ dần -> rõ trong `fade` giây và nhích lên `rise` px. Bố cục cố định (không nhảy dòng)."""
+    if tt < t0:
+        return
+    lay = Image.new("RGBA", frame.size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(lay)
+    lines = txt.split("\n")
+    asc, desc = fnt.getmetrics()
+    lh = asc + desc + spacing
+    total_chars = max(1, len(txt.replace("\n", " ")))
+    pos = 0
+    for li, line in enumerate(lines):
+        lw = d.textlength(line, font=fnt)
+        x0 = cx - lw / 2
+        words = line.split(" ")
+        for wi, w_ in enumerate(words):
+            prefix = " ".join(words[:wi]) + (" " if wi else "")
+            ta = t0 + (t1 - t0) * pos / total_chars
+            pos += len(w_) + 1
+            if tt < ta:
+                continue
+            a = min(1.0, (tt - ta) / fade)
+            e = 1 - (1 - a) ** 3
+            col = fill[:3] + (int(255 * e),)
+            scol = stroke[:3] + (int(255 * e),)
+            d.text((x0 + d.textlength(prefix, font=fnt), y + li * lh + rise * (1 - e)), w_, font=fnt,
+                   fill=col, stroke_width=sw, stroke_fill=scol)
+    frame.alpha_composite(lay)
+
+
 def sparkle(d, cx, cy, r, color):
     k = r * 0.28
     d.polygon([(cx, cy - r), (cx + k, cy - k), (cx + r, cy), (cx + k, cy + k),
@@ -239,7 +270,8 @@ def main():
                     if max(dr.textlength(ln, font=fnt) for ln in txt.split("\n")) <= 940 or size <= 44:
                         break
                     size -= 2
-                center_text(dr, W / 2, 1290, txt, fnt, WHITE, DARK, 6)
+                reveal(frame, txt, fnt, W / 2, 1290, vo_at[k] - 0.05, vo_at[k] + d[k] * 0.92, tt,
+                       WHITE, DARK, 6)
 
     enc = subprocess.Popen(["ffmpeg", "-nostdin", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24",
                             "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-", "-c:v", "libx264", "-preset", "slow",
@@ -253,15 +285,15 @@ def main():
         if tt < sc[2][0]:                                   # ---- cảnh 1: bé thật + tiêu đề
             frame = real1.next()
             dr = ImageDraw.Draw(frame)
-            k = ease_back(tt / 0.4)
             if tt < sc[1][1] - 0.15:
-                lay = Image.new("RGBA", (W, 520), (0, 0, 0, 0))
-                ld = ImageDraw.Draw(lay)
-                ld.rounded_rectangle((W / 2 - 110, 20, W / 2 + 110, 92), 36, fill=PINK)
-                center_text(ld, W / 2, 26, TITLE.split("\n")[0], f_tap, WHITE, PINK, 0)
-                center_text(ld, W / 2, 120, "\n".join(TITLE.split("\n")[1:]), f_title, WHITE, PINK, 9)
-                lay = lay.resize((max(1, int(W * k)), max(1, int(520 * k))))
-                paste_c(frame, lay, W / 2, 380)
+                a = int(255 * ease(tt / 0.3))
+                pill = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+                pd = ImageDraw.Draw(pill)
+                pd.rounded_rectangle((W / 2 - 110, 140, W / 2 + 110, 212), 36, fill=PINK[:3] + (a,))
+                frame.alpha_composite(pill)
+                reveal(frame, TITLE.split("\n")[0], f_tap, W / 2, 144, 0.0, 0.05, tt, WHITE, PINK, 0)
+                reveal(frame, "\n".join(TITLE.split("\n")[1:]), f_title, W / 2, 240, 0.25, 1.1, tt,
+                       WHITE, PINK, 9)
             subtitle(frame, tt)
         elif tt < sc[3][0]:                                 # ---- cảnh 2: Bé Sao + kính lúp
             lt = tt - sc[2][0]
@@ -318,13 +350,8 @@ def main():
                    fill=(255, 255, 255, 200), width=int(R * 0.06))
             hx2, hy2 = cx - R * 0.72, cy + R * 0.72
             dr.line((hx2, hy2, hx2 - R * 0.5, hy2 + R * 0.5), fill=(120, 70, 40), width=int(R * 0.3))
-            if lt > 1.3:
-                kk = ease_back((lt - 1.3) / 0.4)
-                lay = Image.new("RGBA", (W, 200), (0, 0, 0, 0))
-                ld = ImageDraw.Draw(lay)
-                center_text(ld, W / 2, 30, NHAN, f_nhan, WHITE, (215, 40, 60), 9)
-                lay = lay.resize((max(1, int(W * kk)), max(1, int(200 * kk))))
-                paste_c(frame, lay, W / 2, 330)
+            reveal(frame, NHAN, f_nhan, W / 2, 270, sc[3][0] + 1.2, sc[3][0] + 1.9, tt,
+                   WHITE, (215, 40, 60), 9, fade=0.25, rise=20)
         elif tt < sc[5][0]:                                 # ---- cảnh 4: Bé Sao + 2 hình
             lt = tt - sc[4][0]
             frame = bg.copy()

@@ -3,8 +3,10 @@
 
     python3 build.py --real be_that.mp4 --sao ../nhan-vat/bac_si_be_sao.png --vo <thư_mục_vo> --out xuat
 
-Cảnh: 1 bé thật (quay thật) · 2 Bé Sao + kính lúp · 3 kính lúp phóng to tay bé, chấm nhỏ,
-chữ NHÌN SẠCH ≠ ĐÃ SẠCH · 4 Bé Sao + 2 hình (trước khi ăn / sau khi đi vệ sinh) · 5 bé thật · 6 Bé Sao cười, gật đầu.
+Cảnh: 1 bé thật + tiêu đề · 2 kính lúp soi tay bé · 3 phóng to tay bé, chấm nhỏ, chữ NHÌN SẠCH ≠ ĐÃ SẠCH ·
+4 hai thẻ (trước khi ăn / sau khi đi vệ sinh) · 5 bé thật · 6 Bé Sao cười, gật đầu.
+Bác sĩ Bé Sao là nhân vật dẫn NHỎ ở góc trên trái từ cảnh 2 tới hết; giữa màn hình dành cho chữ và hình.
+Mọi chữ hiện từ từ từng chữ.
 Giọng: <vo>/1.wav, 2.wav, 4.wav, 5.wav (giọng tạm AI hoặc thu thật, cùng tên file).
 """
 import argparse
@@ -33,6 +35,8 @@ REAL_SC1 = 0.0
 REAL_SC5 = 8.0
 REAL_HAND = 4.5                 # đoạn bé chỉ tay -> phóng to trong kính lúp
 HAND_CENTER = (450, 960)        # vị trí tay bé trong khung 1080x1920
+SAO_H = 400                     # Bác sĩ Bé Sao: nhỏ, đứng góc trên trái
+LENS_R2 = 230                   # kính lúp ở cảnh 2
 
 
 def F(name, size):
@@ -147,21 +151,6 @@ def emoji(ch, size):
     return im.resize((size, int(im.height * size / im.width)), Image.LANCZOS)
 
 
-def magnifier(R):
-    """Kính lúp hoạt hình: vành xanh, mặt kính trong, cán chéo xuống trái."""
-    s = int(R * 3.2)
-    im = Image.new("RGBA", (s, s), (0, 0, 0, 0))
-    d = ImageDraw.Draw(im)
-    cx = cy = R * 1.15
-    hx, hy = cx - R * 0.75 - R * 1.25, cy + R * 0.75 + R * 1.25
-    d.line((cx - R * 0.72, cy + R * 0.72, hx + R * 0.15, hy - R * 0.15), fill=(120, 70, 40), width=int(R * 0.34))
-    d.ellipse((hx - R * 0.2, hy - R * 0.2, hx + R * 0.2, hy + R * 0.2), fill=(120, 70, 40))
-    d.ellipse((cx - R, cy - R, cx + R, cy + R), fill=(200, 235, 255, 90), outline=BLUE, width=int(R * 0.18))
-    d.arc((cx - R * 0.68, cy - R * 0.68, cx + R * 0.68, cy + R * 0.68), 200, 260, fill=(255, 255, 255, 230),
-          width=int(R * 0.12))
-    return im, (cx, cy)
-
-
 def background():
     g = np.linspace(0, 1, H)[:, None, None]
     top, bot = np.array([214, 238, 255]), np.array([255, 243, 249])
@@ -231,12 +220,11 @@ def main():
     # ---- tài nguyên ----
     sao = Image.open(args.sao).convert("RGBA")
     bg = background()
-    lens_small, lens_c = magnifier(110)
     f_title = F("Baloo2-ExtraBold.ttf", 92)
     f_tap = F("Baloo2-ExtraBold.ttf", 50)
     f_nhan = F("Baloo2-ExtraBold.ttf", 88)
-    f_card = F("Baloo2-ExtraBold.ttf", 46)
-    em_rice, em_wc, em_soap = emoji("🍚", 150), emoji("🚽", 130), emoji("🧼", 150)
+    f_card_big = F("Baloo2-ExtraBold.ttf", 68)
+    em_rice, em_wc, em_soap = emoji("🍚", 190), emoji("🚽", 160), emoji("🧼", 140)
     rng = np.random.default_rng(11)
     germs = []
     for _ in range(30):
@@ -258,6 +246,34 @@ def main():
         paste_c(frame, im, cx, cy - (hgt * sq - hgt) / 2)
         return w_
 
+    def draw_lens(frame, src, cx, cy, R, zoom, src_c, germs_t=None):
+        """Kính lúp: trong mặt kính là hình phóng to `zoom` lần quanh điểm src_c của khung gốc."""
+        R = max(2.0, R)
+        cs = int(2 * R / zoom)
+        sx, sy = src_c
+        crop = src.crop((int(sx - cs / 2), int(sy - cs / 2), int(sx + cs / 2), int(sy + cs / 2))).resize(
+            (int(2 * R), int(2 * R)), Image.LANCZOS)
+        if germs_t is not None:
+            cd = ImageDraw.Draw(crop)
+            for (gx, gy, gr, gt, col, ph) in germs:
+                if germs_t >= gt:
+                    p = ease_back((germs_t - gt) / 0.25) * R / 400
+                    x = R + gx * R / 400 + 3 * math.sin(germs_t * 6 + ph)
+                    y = R + gy * R / 400 + 3 * math.cos(germs_t * 5 + ph)
+                    rr = gr * p
+                    cd.ellipse((x - rr, y - rr, x + rr, y + rr), fill=col + (215,),
+                               outline=tuple(int(c * 0.6) for c in col) + (255,), width=max(1, int(rr * 0.2)))
+        mask = Image.new("L", crop.size, 0)
+        ImageDraw.Draw(mask).ellipse((0, 0, crop.width - 1, crop.height - 1), fill=255)
+        crop.putalpha(mask)
+        paste_c(frame, crop, cx, cy)
+        dr = ImageDraw.Draw(frame)
+        hx2, hy2 = cx + R * 0.72, cy + R * 0.72
+        dr.line((hx2, hy2, hx2 + R * 0.55, hy2 + R * 0.55), fill=(120, 70, 40), width=max(2, int(R * 0.28)))
+        dr.ellipse((cx - R, cy - R, cx + R, cy + R), outline=BLUE, width=max(2, int(R * 0.12)))
+        dr.arc((cx - R * 0.8, cy - R * 0.8, cx + R * 0.8, cy + R * 0.8), 200, 250,
+               fill=(255, 255, 255, 200), width=max(1, int(R * 0.06)))
+
     def subtitle(frame, tt):
         for k in vo_at:
             a, b = vo_at[k] - 0.05, vo_at[k] + d[k] + 0.3
@@ -278,6 +294,7 @@ def main():
                             "-crf", "19", "-pix_fmt", "yuv420p", os.path.join(args.out, "_video.mp4")],
                            stdin=subprocess.PIPE)
     real1, real5, realh = Real(args.real, REAL_SC1), Real(args.real, REAL_SC5), Real(args.real, REAL_HAND)
+    real2 = Real(args.real, REAL_SC1 + sc[1][1])  # cảnh 2 nối tiếp đoạn quay của cảnh 1
     hand_bg = None
     lens_end = (0, 0)
     for fi in range(int(round(total * FPS))):
@@ -295,106 +312,92 @@ def main():
                 reveal(frame, "\n".join(TITLE.split("\n")[1:]), f_title, W / 2, 240, 0.25, 1.1, tt,
                        WHITE, PINK, 9)
             subtitle(frame, tt)
-        elif tt < sc[3][0]:                                 # ---- cảnh 2: Bé Sao + kính lúp
+        elif tt < sc[3][0]:                                 # ---- cảnh 2: kính lúp soi tay bé (quay thật)
             lt = tt - sc[2][0]
-            frame = bg.copy()
-            dr = ImageDraw.Draw(frame)
-            for (x, y, r, ph) in sparks:
-                a = 0.5 + 0.5 * math.sin(tt * 2.3 + ph)
-                if a > 0.4:
-                    sparkle(dr, x, y, r * a, (255, 210, 60, int(230 * a)))
-            k = ease_back(lt / 0.4)
-            e = env("2", tt)
-            hgt = 980 * max(0.01, k)
-            cy = 1000 + 14 * math.sin(lt * 4) - 20 * e
-            draw_sao(frame, 470, cy, hgt, rot=3 * math.sin(lt * 2.5) + 4 * e, sq=1 + 0.03 * e)
-            if lt > 0.9:  # kính lúp bật ra cạnh bàn tay vẫy của Bé Sao
-                kk = ease_back((lt - 0.9) / 0.4)
-                lm = lens_small.resize((max(1, int(lens_small.width * kk)), max(1, int(lens_small.height * kk))))
-                lx, ly = 850 + 10 * math.sin(lt * 3), 640 + 8 * math.cos(lt * 3)
-                frame.alpha_composite(lm, (int(lx - lens_c[0] * kk), int(ly - lens_c[1] * kk)))
-                lens_end = (lx, ly)
+            frame = real2.next()
+            src = frame.copy()
+            frame.alpha_composite(Image.new("RGBA", (W, H), (255, 245, 250, 70)))
+            if lt > 0.6:  # kính lúp bay vào rồi lướt từ tờ tranh tới bàn tay
+                k = ease_back((lt - 0.6) / 0.45)
+                m = ease((lt - 0.9) / (sc[2][1] - 1.2))
+                cx = 760 + (HAND_CENTER[0] + 40 - 760) * m
+                cy = 760 + (HAND_CENTER[1] - 760) * m
+                R = LENS_R2 * max(0.02, k)
+                draw_lens(frame, src, cx, cy, R, 1.8, (cx, cy))
+                lens_end = (cx, cy)
             subtitle(frame, tt)
-        elif tt < sc[4][0]:                                 # ---- cảnh 3: phóng to tay bé
+        elif tt < sc[4][0]:                                 # ---- cảnh 3: phóng to tay bé + chấm nhỏ
             lt = tt - sc[3][0]
             live = realh.next()
             if hand_bg is None:
                 hand_bg = live.filter(ImageFilter.GaussianBlur(22))
-                ov = Image.new("RGBA", (W, H), (255, 240, 248, 120))
-                hand_bg.alpha_composite(ov)
+                hand_bg.alpha_composite(Image.new("RGBA", (W, H), (255, 240, 248, 120)))
             frame = hand_bg.copy()
             k = ease(lt / 0.45)
-            R = 110 + (400 - 110) * k
+            R = LENS_R2 + (400 - LENS_R2) * k
             cx = lens_end[0] + (540 - lens_end[0]) * k
-            cy = lens_end[1] + (900 - lens_end[1]) * k
-            cs = 364
-            hx, hy = HAND_CENTER
-            crop = live.crop((hx - cs // 2, hy - cs // 2, hx + cs // 2, hy + cs // 2)).resize(
-                (int(2 * R), int(2 * R)), Image.LANCZOS)
-            cd = ImageDraw.Draw(crop)
-            for (gx, gy, gr, gt, col, ph) in germs:
-                if lt >= gt:
-                    p = ease_back((lt - gt) / 0.25) * R / 400
-                    x = R + gx * R / 400 + 3 * math.sin(tt * 6 + ph)
-                    y = R + gy * R / 400 + 3 * math.cos(tt * 5 + ph)
-                    rr = gr * p
-                    cd.ellipse((x - rr, y - rr, x + rr, y + rr), fill=col + (215,),
-                               outline=tuple(int(c * 0.6) for c in col) + (255,), width=max(1, int(rr * 0.2)))
-            mask = Image.new("L", crop.size, 0)
-            ImageDraw.Draw(mask).ellipse((0, 0, crop.width - 1, crop.height - 1), fill=255)
-            crop.putalpha(mask)
-            paste_c(frame, crop, cx, cy)
-            dr = ImageDraw.Draw(frame)
-            dr.ellipse((cx - R, cy - R, cx + R, cy + R), outline=BLUE, width=int(R * 0.12))
-            dr.arc((cx - R * 0.8, cy - R * 0.8, cx + R * 0.8, cy + R * 0.8), 200, 250,
-                   fill=(255, 255, 255, 200), width=int(R * 0.06))
-            hx2, hy2 = cx - R * 0.72, cy + R * 0.72
-            dr.line((hx2, hy2, hx2 - R * 0.5, hy2 + R * 0.5), fill=(120, 70, 40), width=int(R * 0.3))
-            reveal(frame, NHAN, f_nhan, W / 2, 270, sc[3][0] + 1.2, sc[3][0] + 1.9, tt,
+            cy = lens_end[1] + (880 - lens_end[1]) * k
+            draw_lens(frame, live, cx, cy, R, 2.2, HAND_CENTER, germs_t=lt)
+            reveal(frame, NHAN, f_nhan, W / 2, 1335, sc[3][0] + 1.2, sc[3][0] + 1.9, tt,
                    WHITE, (215, 40, 60), 9, fade=0.25, rise=20)
-        elif tt < sc[5][0]:                                 # ---- cảnh 4: Bé Sao + 2 hình
+        elif tt < sc[5][0]:                                 # ---- cảnh 4: 2 thẻ hình ở giữa
             lt = tt - sc[4][0]
             frame = bg.copy()
-            e = env("4", tt)
-            point = ease((tt - card_t[0]) / 0.4)
-            draw_sao(frame, 300, 1030 + 12 * math.sin(lt * 4) - 18 * e, 860,
-                     rot=-7 * point + 3 * math.sin(lt * 2.5) + 3 * e, sq=1 + 0.03 * e)
+            dr = ImageDraw.Draw(frame)
+            for (x, y, r, ph) in sparks:
+                a = 0.5 + 0.5 * math.sin(tt * 2.3 + ph)
+                if a > 0.45 and y > 560:
+                    sparkle(dr, x, y, r * a, (255, 210, 60, int(220 * a)))
             for i, (ct, em, lab) in enumerate(((card_t[0], em_rice, "Trước khi ăn"),
-                                               (card_t[1], em_wc, "Sau khi\nđi vệ sinh"))):
+                                               (card_t[1], em_wc, "Sau khi đi vệ sinh"))):
                 if tt >= ct:
-                    kk = ease_back((tt - ct) / 0.4)
-                    card = Image.new("RGBA", (420, 330), (0, 0, 0, 0))
+                    a = ease((tt - ct) / 0.35)
+                    kk = 0.85 + 0.15 * ease_back((tt - ct) / 0.4)
+                    cw, ch = 700, 300
+                    card = Image.new("RGBA", (cw + 20, ch + 26), (0, 0, 0, 0))
                     cdr = ImageDraw.Draw(card)
-                    cdr.rounded_rectangle((10, 16, 410, 320), 40, fill=(200, 60, 120, 50))
-                    card = card.filter(ImageFilter.GaussianBlur(6))
+                    cdr.rounded_rectangle((10, 18, cw + 10, ch + 18), 46, fill=(200, 60, 120, 50))
+                    card = card.filter(ImageFilter.GaussianBlur(7))
                     cdr = ImageDraw.Draw(card)
-                    cdr.rounded_rectangle((10, 10, 410, 314), 40, fill=WHITE, outline=PINK, width=7)
-                    card.alpha_composite(em, (int(210 - em.width / 2), 28))
-                    center_text(cdr, 210, 190 if "\n" not in lab else 170, lab, f_card, PINK, WHITE, 0, spacing=0)
-                    card = card.resize((max(1, int(420 * kk)), max(1, int(330 * kk))))
-                    paste_c(frame, card, 790, 640 + i * 370)
+                    cdr.rounded_rectangle((10, 10, cw + 10, ch + 10), 46, fill=WHITE, outline=PINK, width=8)
+                    card.alpha_composite(em, (60, int(10 + ch / 2 - em.height / 2)))
+                    reveal(card, lab if i == 0 else "Sau khi\nđi vệ sinh", f_card_big, 460,
+                           ch / 2 + 10 - (40 if i == 0 else 80), ct + 0.15, ct + 0.6, tt, PINK, WHITE, 0, rise=8)
+                    card = card.resize((max(1, int(card.width * kk)), max(1, int(card.height * kk))))
+                    card.putalpha(card.getchannel("A").point(lambda v, a=a: int(v * a)))
+                    paste_c(frame, card, 600, 735 + i * 345)
             if tt >= soap_t:
                 kk = ease_back((tt - soap_t) / 0.4)
-                s = em_soap.resize((max(1, int(em_soap.width * kk)), max(1, int(em_soap.height * kk))))
-                paste_c(frame, s, 560 + 6 * math.sin(tt * 5), 1130)
+                s_ = em_soap.resize((max(1, int(em_soap.width * kk)), max(1, int(em_soap.height * kk))))
+                paste_c(frame, s_, 885 + 5 * math.sin(tt * 5), 905)
             subtitle(frame, tt)
         elif tt < sc[6][0]:                                 # ---- cảnh 5: bé thật
             frame = real5.next()
             subtitle(frame, tt)
-        else:                                               # ---- cảnh 6: Bé Sao cười, gật đầu
+        else:                                               # ---- cảnh 6: bé thật + Bé Sao cười, gật đầu
             lt = tt - sc[6][0]
-            frame = bg.copy()
+            frame = real5.next()
             dr = ImageDraw.Draw(frame)
-            for i, (x, y, r, ph) in enumerate(sparks):
-                a = ease_back((lt - i * 0.05) / 0.3)
+            for i, (x, y, r, ph) in enumerate(sparks[:8]):
+                a = ease_back((lt - i * 0.06) / 0.3)
                 if a > 0:
-                    sparkle(dr, x, y, r * min(a, 1.2), (255, 210, 60, 230))
-            k = ease_back(lt / 0.3)
-            nod = math.sin(lt * 2 * math.pi * 1.6)
-            draw_sao(frame, 540, 1000 + 20 * abs(nod), 1000 * max(0.01, k), rot=6 * nod,
-                     sq=1 - 0.05 * abs(nod))
+                    ang = i / 8 * 2 * math.pi
+                    sparkle(dr, 200 + math.cos(ang) * 240, 380 + math.sin(ang) * 240, 16 * min(a, 1.2),
+                            (255, 210, 60, 230))
+        if tt >= sc[2][0]:                                  # Bác sĩ Bé Sao nhỏ ở góc trên trái
+            lt = tt - sc[2][0]
+            k = ease_back(lt / 0.45)
+            talk = max(env("2", tt), env("4", tt))
+            rot = 3 * math.sin(tt * 2.5) + 4 * talk
+            sq, dy = 1 + 0.035 * talk, 8 * math.sin(tt * 4) - 10 * talk
+            if sc[4][0] <= tt < sc[5][0]:
+                rot -= 9 * ease((tt - card_t[0]) / 0.4)      # nghiêng chỉ sang 2 thẻ
+            if tt >= sc[6][0]:                               # bật cười, gật đầu
+                nod = math.sin((tt - sc[6][0]) * 2 * math.pi * 1.6)
+                rot, sq, dy = 7 * nod, 1 - 0.06 * abs(nod), 12 * abs(nod)
+            draw_sao(frame, 200, 375 + dy, SAO_H * max(0.02, k), rot=rot, sq=sq)
         enc.stdin.write(frame.convert("RGB").tobytes())
-    for r in (real1, real5, realh):
+    for r in (real1, real2, real5, realh):
         r.close()
     enc.stdin.close()
     enc.wait()

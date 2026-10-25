@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+<defs>
+ <radialGradient id="body" cx="45%" cy="35%" r="65%">
+  <stop offset="0" stop-color="#FFF6A0"/><stop offset=".45" stop-color="#FFE033"/>
+  <stop offset=".85" stop-color="#FFC61A"/><stop offset="1" stop-color="#FFB000"/>
+ </radialGradient>
+ <linearGradient id="rim" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#FFC21A"/><stop offset="1" stop-color="#E88A00"/>
+ </linearGradient>
+ <clipPath id="mouth"><path d="M462 586 Q512 580 562 586 Q560 662 512 664 Q464 662 462 586Z"/></clipPath>
+ <filter id="sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="14" stdDeviation="14" flood-color="#000" flood-opacity=".28"/></filter>
+</defs>
+<g filter="url(#sh)">
+ <polygon points="512.0,155.0 623.7,391.3 882.9,424.5 692.7,603.7 741.2,860.5 512.0,735.0 282.8,860.5 331.3,603.7 141.1,424.5 400.3,391.3" fill="url(#rim)" stroke="url(#rim)" stroke-width="96" stroke-linejoin="round"/>
+</g>
+<polygon points="512.0,155.0 623.7,391.3 882.9,424.5 692.7,603.7 741.2,860.5 512.0,735.0 282.8,860.5 331.3,603.7 141.1,424.5 400.3,391.3" fill="url(#body)" stroke="url(#body)" stroke-width="66" stroke-linejoin="round"/>
+<!-- gloss -->
+<path d="M470 230 Q500 170 530 230 Q515 300 500 340 Q478 290 470 230Z" fill="#fff" opacity=".75"/>
+<ellipse cx="250" cy="440" rx="70" ry="22" transform="rotate(-12 250 440)" fill="#fff" opacity=".7"/>
+<ellipse cx="760" cy="430" rx="44" ry="14" transform="rotate(10 760 430)" fill="#fff" opacity=".55"/>
+<ellipse cx="335" cy="760" rx="16" ry="44" transform="rotate(25 335 760)" fill="#fff" opacity=".5"/>
+<circle cx="555" cy="260" r="9" fill="#fff" opacity=".8"/>
+<!-- cheeks -->
+<ellipse cx="368" cy="622" rx="46" ry="28" fill="#FF6B8E" opacity=".85"/>
+<ellipse cx="656" cy="622" rx="46" ry="28" fill="#FF6B8E" opacity=".85"/>
+<!-- eyes -->
+<circle cx="418" cy="555" r="40" fill="#1A1010"/>
+<circle cx="606" cy="555" r="40" fill="#1A1010"/>
+<circle cx="432" cy="538" r="15" fill="#fff"/><circle cx="406" cy="572" r="6" fill="#fff"/>
+<circle cx="620" cy="538" r="15" fill="#fff"/><circle cx="594" cy="572" r="6" fill="#fff"/>
+<!-- mouth -->
+<path d="M462 586 Q512 580 562 586 Q560 662 512 664 Q464 662 462 586Z" fill="#2A1414" stroke="#2A1414" stroke-width="6" stroke-linejoin="round"/>
+<g clip-path="url(#mouth)"><ellipse cx="512" cy="668" rx="40" ry="30" fill="#FF5577"/></g>
+</svg>

@@ -32,3 +32,19 @@ Claude sẽ dùng ffmpeg và faster-whisper (do các file cài đặt ở trên 
 - Tự tạo phụ đề `.srt` từ giọng nói, sửa lỗi chính tả rồi gắn thẳng vào video
 
 File gốc không bao giờ bị ghi đè; video mới được lưu cạnh file gốc.
+
+## Lệnh `/tao-anh-bia`: ảnh bìa TikTok theo nhận diện Bé Sao
+
+Gửi cho Claude **một ảnh + câu hook**, ví dụ:
+
+> /tao-anh-bia ảnh này, hook: Đón con đi học về / sao người con lại / có mùi thế này ?
+
+Claude sẽ tạo ảnh bìa 1080x1920 đúng bộ nhận diện: khung tiêu đề trắng viền xanh, ngôi sao vàng mặt cười, chữ xanh in hoa, một dòng nhấn mạnh (bầu dục hồng, thẻ hồng, bút dạ vàng, cọ xanh, chữ to kèm emoji) và các điểm nhấn như tia sáng, lấp lánh, bong bóng, trái tim.
+
+Tự chạy trên máy (cần Python 3 và Pillow):
+
+```bash
+python3 .claude/skills/tao-anh-bia/scripts/tao_anh_bia.py anh.jpg --hook "Mẹ nào cũng / [hong] ghiền cái này / ôm con rồi không muốn buông"
+```
+
+Muốn dùng đúng file khung và ngôi sao gốc: bỏ `khung.png` và `ngoi-sao.png` (nền trong suốt) vào `.claude/skills/tao-anh-bia/assets/`.

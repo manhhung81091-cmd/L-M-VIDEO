@@ -564,17 +564,28 @@ def chon_co_chu(dong, rong_toi_da, ty_le=1.0):
 
 
 def ve_net_co(layer, x0, x1, ymid, cao, mau, seed, so_net=16):
+    """Vệt cọ/bút dạ: nhiều nét mảnh, hai đầu thon và lởm chởm như quét bằng cọ khô."""
     rnd = random.Random(seed)
     tmp = Image.new("RGBA", layer.size, (0, 0, 0, 0))
     d = ImageDraw.Draw(tmp)
-    for _ in range(so_net):
-        y = ymid + (rnd.random() - 0.5) * cao
-        wd = int(cao * rnd.uniform(0.25, 0.5))
-        a = rnd.randint(140, 210)
-        xa = x0 + rnd.uniform(0, 0.06) * (x1 - x0)
-        xb = x1 - rnd.uniform(0, 0.06) * (x1 - x0)
-        d.line([(xa, y + rnd.uniform(-3, 3) * S), (xb, y + rnd.uniform(-3, 3) * S)], fill=mau + (a,), width=max(2, wd))
-    tmp = tmp.filter(ImageFilter.GaussianBlur(S * 0.8))
+    dai = x1 - x0
+    for _ in range(int(so_net * 1.6)):
+        y = ymid + (rnd.random() - 0.5) * cao * 0.85
+        day = cao * rnd.uniform(0.1, 0.22)
+        a = rnd.randint(120, 200)
+        xa = x0 + rnd.uniform(0, 0.12) * dai
+        xb = x1 - rnd.uniform(0, 0.12) * dai
+        nghieng = rnd.uniform(-0.03, 0.03) * cao
+        buoc = max(2, int(day * 0.35))
+        n = max(2, int((xb - xa) / buoc))
+        for k in range(n + 1):
+            tt = k / n
+            x = xa + (xb - xa) * tt
+            # đầu nét thon lại, đầu cuối kéo lởm chởm
+            r = day / 2 * min(1, tt * 6, (1 - tt) * 3 + 0.15) * rnd.uniform(0.85, 1.1)
+            yy = y + nghieng * (tt - 0.5) + rnd.uniform(-0.6, 0.6) * S
+            d.ellipse([x - r, yy - r, x + r, yy + r], fill=mau + (a,))
+    tmp = tmp.filter(ImageFilter.GaussianBlur(S * 0.6))
     layer.alpha_composite(tmp)
 
 

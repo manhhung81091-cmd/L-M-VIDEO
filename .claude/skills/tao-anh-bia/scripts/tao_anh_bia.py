@@ -251,41 +251,94 @@ def ve_ngoi_sao(size):
 
 
 # ------------------------------------------------------------------ điểm nhấn
-TIA_VANG = ((255, 212, 59), (240, 160, 30), (255, 246, 196))
-TIA_HONG = ((255, 143, 184), (232, 92, 142), (255, 220, 234))
+# Bảng màu tia: (sáng, đậm, viền, bóng đổ trong)
+TIA_VANG = ((255, 228, 80), (255, 170, 0), (255, 255, 255), (238, 140, 0))
+TIA_HONG = ((255, 200, 222), (255, 105, 160), (255, 72, 145), (235, 70, 135))
 
 
-def ve_tia(layer, cx, cy, huong, bang_mau, dai=s(50), rong=s(10), goc=38, r0=s(24)):
-    """Ba tia hình nêm (đầu trong nhọn, đầu ngoài tròn to) toả ra từ (cx, cy) theo hướng (độ)."""
-    fill, edge, hl = bang_mau
-    d = ImageDraw.Draw(layer)
+def _nem(cx, cy, ux, uy, r_in, r_out, w_in, w_out, n=14):
+    """Đa giác hình nêm: đầu trong hẹp tròn, đầu ngoài rộng tròn."""
+    nx, ny = -uy, ux
+    p0 = (cx + ux * r_in, cy + uy * r_in)
+    p1 = (cx + ux * r_out, cy + uy * r_out)
+    pts = []
+    for j in range(n + 1):  # nửa vòng đầu ngoài
+        t = math.pi / 2 - j * math.pi / n
+        pts.append((p1[0] + w_out * (ux * math.cos(t) + nx * math.sin(t)),
+                    p1[1] + w_out * (uy * math.cos(t) + ny * math.sin(t))))
+    for j in range(n + 1):  # nửa vòng đầu trong
+        t = -math.pi / 2 - j * math.pi / n
+        pts.append((p0[0] + w_in * (ux * math.cos(t) + nx * math.sin(t)),
+                    p0[1] + w_in * (uy * math.cos(t) + ny * math.sin(t))))
+    return pts
 
-    def nem(a, r_in, r_out, w_in, w_out):
-        ux, uy = math.cos(a), math.sin(a)
-        nx, ny = -uy, ux
-        p0 = (cx + ux * r_in, cy + uy * r_in)
-        p1 = (cx + ux * r_out, cy + uy * r_out)
-        pts = [(p0[0] + nx * w_in, p0[1] + ny * w_in), (p1[0] + nx * w_out, p1[1] + ny * w_out)]
-        for j in range(1, 12):
-            t = math.pi / 2 - j * math.pi / 12
-            pts.append((p1[0] + w_out * (ux * math.cos(t) + nx * math.sin(t)),
-                        p1[1] + w_out * (uy * math.cos(t) + ny * math.sin(t))))
-        pts += [(p1[0] - nx * w_out, p1[1] - ny * w_out), (p0[0] - nx * w_in, p0[1] - ny * w_in)]
-        return pts
 
-    for da in (-goc, 0, goc):
-        a = math.radians(huong + da)
-        L = dai * (1.0 if da == 0 else 0.85)
-        e = s(2.5)
-        d.polygon(nem(a, r0 - e, r0 + L + e, rong * 0.3 + e, rong + e), fill=edge + (255,))
-        d.polygon(nem(a, r0, r0 + L, rong * 0.3, rong), fill=fill + (255,))
-        # vệt sáng dọc tia
-        ux, uy = math.cos(a), math.sin(a)
-        nx, ny = -uy, ux
-        o = rong * 0.35
-        q0 = (cx + ux * (r0 + L * 0.35) + nx * o * 0.6, cy + uy * (r0 + L * 0.35) + ny * o * 0.6)
-        q1 = (cx + ux * (r0 + L * 0.9) + nx * o, cy + uy * (r0 + L * 0.9) + ny * o)
-        d.line([q0, q1], fill=hl + (220,), width=max(2, int(rong * 0.35)))
+def _sprite_tia(dai, rong, bang_mau, k=3):
+    """Một tia bóng nổi, nằm ngang, đầu nhọn bên trái. Trả về ảnh RGBA cỡ 2x."""
+    sang, dam, vien, bong = bang_mau
+    L, R = dai * k, rong * k
+    vien_day = R * (0.42 if vien == (255, 255, 255) else 0.3)
+    pad = int(vien_day + R * 0.6)
+    w, h = int(L + 2 * pad), int(2 * R + 2 * pad)
+    cy = h / 2
+    shape = Image.new("L", (w, h), 0)
+    ImageDraw.Draw(shape).polygon(_nem(pad, cy, 1, 0, R * 0.35, L - R, R * 0.35, R), fill=255)
+    shape = shape.filter(ImageFilter.GaussianBlur(1))
+    out = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+
+    # viền (trắng như sticker cho tia vàng, hồng đậm cho tia hồng) + bóng mờ
+    vmask = shape.filter(ImageFilter.MaxFilter(int(vien_day) * 2 + 1)).filter(ImageFilter.GaussianBlur(1.5))
+    shadow = vmask.filter(ImageFilter.GaussianBlur(R * 0.25))
+    to_mau(out, shadow, (120, 120, 140), 60)
+    to_mau(out, vmask, vien)
+
+    # thân: chuyển màu từ trên (sáng) xuống dưới (đậm)
+    col = Image.new("RGBA", (1, h))
+    for y in range(h):
+        tt = min(1, max(0, (y - (cy - R)) / (2 * R)))
+        tt = tt ** 1.3
+        col.putpixel((0, y), tuple(int(sang[i] + (dam[i] - sang[i]) * tt) for i in range(3)) + (255,))
+    body = col.resize((w, h))
+    body.putalpha(shape)
+    out.alpha_composite(body)
+
+    # bóng đậm dọc mép dưới bên trong
+    lech = shape.transform((w, h), Image.AFFINE, (1, 0, 0, 0, 1, -R * 0.35))
+    vien_trong = ImageChops.subtract(shape, lech).filter(ImageFilter.GaussianBlur(R * 0.12))
+    to_mau(out, ImageChops.multiply(vien_trong, shape), bong, 150)
+
+    # vệt bóng trắng dọc mép trên + chấm sáng ở đầu to
+    hl = Image.new("L", (w, h), 0)
+    hd = ImageDraw.Draw(hl)
+    x_a, x_b = pad + L * 0.3, pad + L - R * 1.15
+    y_a, y_b = cy - R * 0.25, cy - R * 0.6
+    hd.line([(x_a, y_a), (x_b, y_b)], fill=230, width=max(2, int(R * 0.2)))
+    hd.ellipse([x_b - R * 0.12, y_b - R * 0.12, x_b + R * 0.2, y_b + R * 0.12], fill=255)
+    hl = ImageChops.multiply(hl.filter(ImageFilter.GaussianBlur(R * 0.05)), shape)
+    to_mau(out, hl, (255, 255, 255))
+
+    return out.resize((max(1, w // k), max(1, h // k)), Image.LANCZOS), pad / k
+
+
+def ve_tia(layer, cx, cy, huong, bang_mau, dai=s(56), rong=s(11), goc=42, r0=s(30), so_tia=None):
+    """Các tia hình nêm bóng nổi toả ra từ (cx, cy) theo hướng (độ).
+
+    Tia vàng mặc định 2 cánh, tia hồng 3 cánh (giống icon của thương hiệu)."""
+    if so_tia is None:
+        so_tia = 2 if bang_mau is TIA_VANG else 3
+    if bang_mau is TIA_VANG:  # 2 cánh vàng to, mập hơn tia hồng
+        dai, rong = dai * 1.15, rong * 1.3
+    goc_list = (-goc * 0.7, goc * 0.7) if so_tia == 2 else (-goc, 0, goc)
+    for da in goc_list:
+        a = huong + da
+        L = dai * (1.0 if abs(da) < goc * 0.7 else 0.85)
+        sp, pad = _sprite_tia(L, rong, bang_mau)
+        rot = sp.rotate(-a, resample=Image.BICUBIC, expand=True)
+        # tâm sprite (giữa thân tia) trong toạ độ ảnh
+        mid = r0 + L / 2
+        ux, uy = math.cos(math.radians(a)), math.sin(math.radians(a))
+        px, py = cx + ux * mid, cy + uy * mid
+        layer.alpha_composite(rot, (int(px - rot.width / 2), int(py - rot.height / 2)))
 
 
 def ve_lap_lanh(d, cx, cy, r, mau):
@@ -725,9 +778,9 @@ def tao_lop_phu(hook, sao="trai", diem_nhan="tu-dong", y_top=45, ty_le=1.0):
             ve_tia(layer, cx - half, mid, 180, mau)
             ve_tia(layer, cx + half, mid, 0, mau)
     if "tia-hong-goc" in chon:
-        ve_tia(layer, x0 + cw * 0.84, y0 + ch * 0.26, -36, TIA_HONG, dai=s(66), rong=s(12), goc=34, r0=s(18))
+        ve_tia(layer, x0 + cw * 0.84, y0 + ch * 0.26, -36, TIA_HONG, dai=s(62), rong=s(12), goc=40, r0=s(30))
     if "tia-vang-goc" in chon:
-        ve_tia(layer, x0 + cw * 0.84, y0 + ch * 0.26, -36, TIA_VANG, dai=s(66), rong=s(12), goc=34, r0=s(18))
+        ve_tia(layer, x0 + cw * 0.84, y0 + ch * 0.26, -36, TIA_VANG, dai=s(62), rong=s(12), goc=40, r0=s(30))
     if "lap-lanh" in chon:
         ve_lap_lanh(dr, x0 + cw * 0.965, y0 + ch * 0.17, s(28), VANG)
         ve_lap_lanh(dr, x0 + cw * 0.91, y0 + ch * 0.1, s(15), (255, 255, 255))

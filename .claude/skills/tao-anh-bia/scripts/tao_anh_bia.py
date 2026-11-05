@@ -761,6 +761,8 @@ def tao_lop_phu(hook, sao="trai", diem_nhan="tu-dong", y_top=45, ty_le=1.0):
         if i == len(dong) - 1 and len(dong) >= 2 and sao != "an":
             # đẩy dòng cuối tránh khỏi ngôi sao nếu dòng dài
             thua = be_rong_hinh(d, d.size) / 2 - (RONG_CHU / 2 - LE_SAO)
+            # không đẩy quá mép bên kia của vùng chữ
+            thua = min(thua, (RONG_CHU - be_rong_hinh(d, d.size)) / 2)
             if thua > 0:
                 cxd = cx + (thua if sao == "trai" else -thua)
             else:

@@ -783,8 +783,8 @@ def tao_lop_phu(hook, sao="trai", diem_nhan="tu-dong", y_top=45, ty_le=1.0):
     if "tia-vang-goc" in chon:
         ve_tia(layer, x0 + cw * 0.84, y0 + ch * 0.26, -36, TIA_VANG, dai=s(62), rong=s(12), goc=40, r0=s(30))
     if "lap-lanh" in chon:
-        ve_lap_lanh(dr, x0 + cw * 0.965, y0 + ch * 0.17, s(28), VANG)
-        ve_lap_lanh(dr, x0 + cw * 0.91, y0 + ch * 0.1, s(15), (255, 255, 255))
+        ve_lap_lanh(dr, x0 + cw * 0.965, max(s(36), y0 + ch * 0.17), s(28), VANG)
+        ve_lap_lanh(dr, x0 + cw * 0.91, max(s(22), y0 + ch * 0.1), s(15), (255, 255, 255))
         ve_lap_lanh(dr, x0 + cw * 0.2, y0 + ch * 1.02, s(20), VANG)
     if "bong-bong" in chon:
         ve_bong_bong(layer, x0 + cw * 0.97, y0 + ch * 0.92, s(26))

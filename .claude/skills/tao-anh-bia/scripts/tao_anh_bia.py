@@ -554,7 +554,7 @@ def chon_co_chu(dong, rong_toi_da, ty_le=1.0):
             base = 70
         else:
             base = 56 if n >= 3 else 62
-        size = s(base * ty_le)
+        size = s(base * ty_le * TL_KHUNG)
         rong = rong_toi_da
         if n >= 2 and i == n - 1:
             rong -= LE_SAO  # dòng cuối chừa chỗ cho ngôi sao ở góc dưới
@@ -685,7 +685,9 @@ def nen_9_16(path, day_xuong=0):
     return im
 
 
-RONG_CHU = s(840)  # bề rộng tối đa của một dòng chữ
+# Cỡ khung so với bản gốc: 0.9 để khung gọn, không sát mép ô ảnh bìa TikTok
+TL_KHUNG = 0.9
+RONG_CHU = s(840 * TL_KHUNG)  # bề rộng tối đa của một dòng chữ
 
 
 def kich_thuoc_khung(dong, ty_le=1.0):
@@ -693,7 +695,7 @@ def kich_thuoc_khung(dong, ty_le=1.0):
     chon_co_chu(dong, RONG_CHU, ty_le)
     gap = s(10 * ty_le)
     hc = sum(d.chieu_cao() for d in dong) + gap * (len(dong) - 1)
-    ch = max(s(330 * ty_le), int(hc / 0.64))
+    ch = max(s(330 * ty_le * TL_KHUNG), int(hc / 0.64))
     return gap, hc, ch
 
 
@@ -717,7 +719,9 @@ def xep_khung_tranh_dau(hook, y_top, dinh_dau, le=-25):
         _, _, ch = kich_thuoc_khung(dong, k)
         cao = ch / S * DAY_KHUNG
         if y_top + cao <= gioi_han:
-            return y_top, k, 0
+            # căn khung giữa mép trên ô ảnh bìa (y=240) và đỉnh đầu, không thấp quá
+            giua = int((240 + gioi_han - cao) / 2)
+            return max(y_top, min(giua, Y_THAP_NHAT)), k, 0
         if y_min + cao <= gioi_han:
             return int(gioi_han - cao), k, 0
     k = 1.0 - 0.04 * 4
@@ -772,6 +776,7 @@ def tim_dinh_dau(anh):
 # TikTok hiển thị ảnh bìa trên trang cá nhân dạng 3:4 (cắt ~240px trên và dưới),
 # nên khung phải nằm trong vùng này để luôn thấy trọn vẹn.
 VUNG_AN_TOAN_TREN = 250
+Y_THAP_NHAT = 330  # khi còn nhiều chỗ, khung không xuống thấp hơn mức này
 Y_MAC_DINH = 258
 
 
@@ -781,7 +786,7 @@ def tao_lop_phu(hook, sao="trai", diem_nhan="tu-dong", y_top=Y_MAC_DINH, ty_le=1
         raise SystemExit("Hook trống.")
     seed = int(hashlib.md5(hook.encode()).hexdigest()[:8], 16)
 
-    cw = s(1040)
+    cw = s(1040 * TL_KHUNG)
     gap, hc, ch = kich_thuoc_khung(dong, ty_le)
 
     layer = Image.new("RGBA", (W * S, H * S), (0, 0, 0, 0))
@@ -878,9 +883,9 @@ def tao_lop_phu(hook, sao="trai", diem_nhan="tu-dong", y_top=Y_MAC_DINH, ty_le=1
         ve_tim(dr, x0 + cw * 0.14, y0 + ch * 0.02, s(12), (255, 180, 205))
 
     if sao != "an":
-        st = ve_ngoi_sao(s(190 * max(ty_le, 0.85)))
+        st = ve_ngoi_sao(s(190 * TL_KHUNG * max(ty_le, 0.85)))
         # giữ trọn ngôi sao trong ảnh, cách mép 10px
-        sx = s(10) if sao == "trai" else W * S - st.width - s(10)
+        sx = x0 - s(45) if sao == "trai" else x0 + cw - st.width + s(45)
         sy = int(y0 + ch * 0.9 - st.height / 2)
         layer.alpha_composite(st, (int(sx), sy))
 

@@ -739,8 +739,9 @@ def tao_lop_phu(hook, sao="trai", diem_nhan="tu-dong", y_top=45, ty_le=1.0):
     k_nhan = nhan[0].kieu if nhan else "thuong"
     if diem_nhan == "tu-dong":
         chon = {
-            "vang": {"tia-vang", "lap-lanh"},
-            "to": {"tia-vang", "lap-lanh"},
+            # người dùng không thích tia vàng: chỉ dùng khi gọi rõ --diem-nhan tia-vang
+            "vang": {"lap-lanh"},
+            "to": {"lap-lanh"},
             "hong": {"tia-hong-goc", "tim"},
             "the": {"tia-hong-goc", "tim"},
             "so": {"tia-hong-goc"},

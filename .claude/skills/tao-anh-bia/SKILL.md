@@ -9,7 +9,8 @@ Trả lời bằng tiếng Việt. Người dùng chỉ cần gửi **ảnh + c�
 
 ## Bộ nhận diện (giữ cố định)
 
-- **Vùng an toàn ảnh bìa:** TikTok hiển thị ảnh bìa trên trang cá nhân dạng 3:4, cắt khoảng 240px phía trên và 240px phía dưới.
+- **Vị trí khung người dùng đang chọn (từ bìa "Sạch nhẹ nhàng"):** chạy với `--giua` — khung ở giữa mép trên ảnh và đỉnh đầu, hạ thêm ~50px, mép dưới chạm ngọn tóc. Họ chấp nhận dòng đầu có thể bị cắt trên lưới 3:4.
+- **Vùng an toàn ảnh bìa (khi không dùng `--giua`):** TikTok hiển thị ảnh bìa trên trang cá nhân dạng 3:4, cắt khoảng 240px phía trên và 240px phía dưới.
   Khung (kể cả ngôi sao, lấp lánh) phải nằm trọn trong vùng y = 240…1680. Mặc định mép trên tấm nền xanh ở y = 258, không đặt cao hơn y = 250: trên lưới TikTok khung nằm sát mép trên ô, thấy trọn viền xanh, giống ảnh chụp trang kênh của người dùng. Khung được chạm nhẹ ngọn tóc nhưng không che trán.
   Khi kiểm tra, cắt thử vùng 3:4 (`crop((0, 240, 1080, 1680))`) và xem khung có trọn vẹn, cân đối không.
 

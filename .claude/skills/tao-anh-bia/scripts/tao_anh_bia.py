@@ -735,7 +735,10 @@ def dat_khung_giua(hook, dinh_dau, le=30):
         cao = ch / S * DAY_KHUNG
         if cao + 2 * le <= dinh_dau:
             break
-    return max(le, int((dinh_dau - cao) / 2)), k, 0
+    # người dùng chọn: giữa khoảng trống rồi hạ thêm ~50px, nhưng không quá chạm ngọn tóc
+    y = int((dinh_dau - cao) / 2) + 50
+    y = min(y, int(dinh_dau - cao + 10))
+    return max(le, y), k, 0
 
 
 def tim_dinh_dau(anh):

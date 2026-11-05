@@ -742,7 +742,8 @@ def tao_lop_phu(hook, sao="trai", diem_nhan="tu-dong", y_top=45, ty_le=1.0):
 
     if sao != "an":
         st = ve_ngoi_sao(s(190 * max(ty_le, 0.85)))
-        sx = x0 - s(40) if sao == "trai" else x0 + cw - st.width + s(40)
+        # giữ trọn ngôi sao trong ảnh, cách mép 10px
+        sx = s(10) if sao == "trai" else W * S - st.width - s(10)
         sy = int(y0 + ch * 0.86 - st.height / 2)
         layer.alpha_composite(st, (int(sx), sy))
 

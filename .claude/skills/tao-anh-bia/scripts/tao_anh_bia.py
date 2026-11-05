@@ -535,7 +535,10 @@ def be_rong_hinh(d, size):
 
 
 def gioi_han(d, rong):
-    return rong + {"hong": s(20), "the": s(0), "nen": s(10), "xanh": s(130)}.get(d.kieu, 0)
+    return rong + {"hong": -s(50), "the": s(0), "nen": s(10), "xanh": s(130)}.get(d.kieu, 0)
+
+
+LE_SAO = s(110)
 
 
 def chon_co_chu(dong, rong_toi_da, ty_le=1.0):
@@ -552,7 +555,10 @@ def chon_co_chu(dong, rong_toi_da, ty_le=1.0):
         else:
             base = 56 if n >= 3 else 62
         size = s(base * ty_le)
-        while be_rong_hinh(d, size) > gioi_han(d, rong_toi_da) and size > s(28):
+        rong = rong_toi_da
+        if n >= 2 and i == n - 1:
+            rong -= LE_SAO  # dòng cuối chừa chỗ cho ngôi sao ở góc dưới
+        while be_rong_hinh(d, size) > gioi_han(d, rong) and size > s(28):
             size -= s(1)
         d.size = size
 
@@ -751,7 +757,15 @@ def tao_lop_phu(hook, sao="trai", diem_nhan="tu-dong", y_top=45, ty_le=1.0):
     for i, d in enumerate(dong):
         hh = d.chieu_cao()
         mid = cy + hh / 2
-        tw = ve_dong(layer, d, cx, mid, seed + i * 7)
+        cxd = cx
+        if i == len(dong) - 1 and len(dong) >= 2 and sao != "an":
+            # đẩy dòng cuối tránh khỏi ngôi sao nếu dòng dài
+            thua = be_rong_hinh(d, d.size) / 2 - (RONG_CHU / 2 - LE_SAO)
+            if thua > 0:
+                cxd = cx + (thua if sao == "trai" else -thua)
+            else:
+                cxd = cx
+        tw = ve_dong(layer, d, cxd, mid, seed + i * 7)
         vi_tri.append((d, mid, tw))
         cy += hh + gap
 
@@ -821,7 +835,7 @@ def tao_lop_phu(hook, sao="trai", diem_nhan="tu-dong", y_top=45, ty_le=1.0):
         st = ve_ngoi_sao(s(190 * max(ty_le, 0.85)))
         # giữ trọn ngôi sao trong ảnh, cách mép 10px
         sx = s(10) if sao == "trai" else W * S - st.width - s(10)
-        sy = int(y0 + ch * 0.86 - st.height / 2)
+        sy = int(y0 + ch * 0.9 - st.height / 2)
         layer.alpha_composite(st, (int(sx), sy))
 
     return layer.resize((W, H), Image.LANCZOS)

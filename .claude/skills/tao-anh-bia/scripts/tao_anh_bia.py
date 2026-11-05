@@ -14,6 +14,8 @@ Mỗi dòng cách nhau bằng " / " (hoặc xuống dòng). Thẻ đặt đầu 
     [vang]  vệt bút dạ vàng phía sau chữ
     [xanh]  hai vệt cọ xanh hai bên chữ
     [nen]   chữ trắng trên nền xanh bo tròn
+    [so]    số đầu dòng cỡ rất lớn (ví dụ "[so] 3 SAI LẦM")
+    [gach]  gạch chân hồng dưới dòng
 Không gắn thẻ nào thì dòng nhấn mạnh được chọn tự động.
 Emoji cuối dòng (ví dụ "TRÁI CAM 🍊") được vẽ màu nếu máy có font emoji.
 
@@ -50,7 +52,7 @@ VANG = (255, 214, 46)            # #FFD62E
 VANG_VIEN = (242, 165, 22)
 VIEN_TOI = (45, 45, 45)
 
-KIEU = {"to", "hong", "the", "vang", "xanh", "nen"}
+KIEU = {"to", "hong", "the", "vang", "xanh", "nen", "so", "gach"}
 KIEU_TU_DONG = ["hong", "the", "vang", "xanh"]
 
 # Hình khung theo ảnh mẫu (toạ độ trên khung 2000x1000).
@@ -112,7 +114,7 @@ def gradient_doc(size, top, bottom):
 
 
 # ------------------------------------------------------------------ khung
-def ve_khung(w, h, nghieng=0.75):
+def ve_khung(w, h, nghieng=0.3):
     """Khung tiêu đề (2 lớp) cỡ w x h pixel 2x. nghieng<1 làm khung bớt xiên."""
     pad = s(30)
     size = (w + 2 * pad, h + 2 * pad)
@@ -249,18 +251,41 @@ def ve_ngoi_sao(size):
 
 
 # ------------------------------------------------------------------ điểm nhấn
-def ve_tia(d, cx, cy, huong, dai, mau, vien, rong=s(13), goc=34):
-    """Ba tia toả ra từ (cx, cy) theo hướng (độ)."""
+TIA_VANG = ((255, 212, 59), (240, 160, 30), (255, 246, 196))
+TIA_HONG = ((255, 143, 184), (232, 92, 142), (255, 220, 234))
+
+
+def ve_tia(layer, cx, cy, huong, bang_mau, dai=s(50), rong=s(10), goc=38, r0=s(24)):
+    """Ba tia hình nêm (đầu trong nhọn, đầu ngoài tròn to) toả ra từ (cx, cy) theo hướng (độ)."""
+    fill, edge, hl = bang_mau
+    d = ImageDraw.Draw(layer)
+
+    def nem(a, r_in, r_out, w_in, w_out):
+        ux, uy = math.cos(a), math.sin(a)
+        nx, ny = -uy, ux
+        p0 = (cx + ux * r_in, cy + uy * r_in)
+        p1 = (cx + ux * r_out, cy + uy * r_out)
+        pts = [(p0[0] + nx * w_in, p0[1] + ny * w_in), (p1[0] + nx * w_out, p1[1] + ny * w_out)]
+        for j in range(1, 12):
+            t = math.pi / 2 - j * math.pi / 12
+            pts.append((p1[0] + w_out * (ux * math.cos(t) + nx * math.sin(t)),
+                        p1[1] + w_out * (uy * math.cos(t) + ny * math.sin(t))))
+        pts += [(p1[0] - nx * w_out, p1[1] - ny * w_out), (p0[0] - nx * w_in, p0[1] - ny * w_in)]
+        return pts
+
     for da in (-goc, 0, goc):
         a = math.radians(huong + da)
-        r0 = s(16)
-        r1 = r0 + dai * (1.0 if da == 0 else 0.8)
-        p0 = (cx + r0 * math.cos(a), cy + r0 * math.sin(a))
-        p1 = (cx + r1 * math.cos(a), cy + r1 * math.sin(a))
-        for color, wd in ((vien, rong + s(5)), (mau, rong)):
-            d.line([p0, p1], fill=color + (255,), width=wd)
-            for p in (p0, p1):
-                d.ellipse([p[0] - wd / 2, p[1] - wd / 2, p[0] + wd / 2, p[1] + wd / 2], fill=color + (255,))
+        L = dai * (1.0 if da == 0 else 0.85)
+        e = s(2.5)
+        d.polygon(nem(a, r0 - e, r0 + L + e, rong * 0.3 + e, rong + e), fill=edge + (255,))
+        d.polygon(nem(a, r0, r0 + L, rong * 0.3, rong), fill=fill + (255,))
+        # vệt sáng dọc tia
+        ux, uy = math.cos(a), math.sin(a)
+        nx, ny = -uy, ux
+        o = rong * 0.35
+        q0 = (cx + ux * (r0 + L * 0.35) + nx * o * 0.6, cy + uy * (r0 + L * 0.35) + ny * o * 0.6)
+        q1 = (cx + ux * (r0 + L * 0.9) + nx * o, cy + uy * (r0 + L * 0.9) + ny * o)
+        d.line([q0, q1], fill=hl + (220,), width=max(2, int(rong * 0.35)))
 
 
 def ve_lap_lanh(d, cx, cy, r, mau):
@@ -357,10 +382,21 @@ class Dong:
         self.text = "".join(p for p, e in self.runs if not e).strip()
         self.co_emoji = any(e for _, e in self.runs)
         self.size = 0
+        self.so = ""
+        if kieu == "so":
+            m = re.match(r"\s*(\d+)\s*(.*)", text)
+            if m:
+                self.so = m.group(1)
+                rest = m.group(2)
+                self.runs = [(p, bool(EMOJI_RE.fullmatch(p))) for p in EMOJI_RE.split(rest) if p]
+
+    TI_LE_SO = 1.75
 
     def do_rong(self, size):
         f = font(size, self.dam)
         w = 0
+        if self.so:
+            w += font(int(size * self.TI_LE_SO), True).getlength(self.so) + size * 0.22
         for p, e in self.runs:
             if e:
                 w += int(size * 1.15) + s(8) if font_emoji() else 0
@@ -370,12 +406,16 @@ class Dong:
 
     @property
     def dam(self):
-        return self.kieu in ("to", "hong", "the", "nen", "vang", "xanh")
+        return self.kieu in ("to", "hong", "the", "nen", "vang", "xanh", "so")
 
     def chieu_cao(self):
         if self.kieu in ("hong", "the", "nen"):
             return self.size * 1.62
-        return self.size * 1.3
+        if self.so:
+            return self.size * self.TI_LE_SO * 1.08
+        if self.kieu == "gach":
+            return self.size * 1.5
+        return self.size * 1.4
 
 
 def phan_tich_hook(hook):
@@ -390,6 +430,8 @@ def phan_tich_hook(hook):
     if dong and all(d.kieu == "thuong" for d in dong):
         if len(dong) == 1:
             dong[0].kieu = "to"
+        elif len(dong) == 2:
+            pass  # 2 dòng thường: dòng đầu to, tia hồng hai bên
         else:
             idx = 1 if len(dong) >= 2 else 0
             if len(dong) >= 3:
@@ -424,13 +466,15 @@ def chon_co_chu(dong, rong_toi_da, ty_le=1.0):
     n = len(dong)
     for i, d in enumerate(dong):
         if d.kieu == "to":
-            base = 104
+            base = 100
+        elif d.kieu == "so":
+            base = 84
         elif d.kieu in ("hong", "the", "nen", "vang", "xanh"):
             base = 76
         elif i == 0:
-            base = 66
+            base = 70
         else:
-            base = 50 if n >= 3 else 58
+            base = 56 if n >= 3 else 62
         size = s(base * ty_le)
         while be_rong_hinh(d, size) > gioi_han(d, rong_toi_da) and size > s(28):
             size -= s(1)
@@ -483,6 +527,21 @@ def ve_dong(layer, d, cx, cy, seed):
     # chữ + emoji
     f = font(size, d.dam)
     x = cx - tw / 2
+    if d.so:
+        fs = font(int(size * d.TI_LE_SO), True)
+        # canh đáy số với đáy chữ, cả cụm căn giữa theo chiều dọc
+        nap = size * d.TI_LE_SO * 0.72
+        base = cy + nap / 2
+        draw.text((x, base), d.so, font=fs, fill=XANH_CHU + (255,), anchor="ls")
+        x += fs.getlength(d.so) + size * 0.22
+        for p, e in d.runs:
+            if not e:
+                draw.text((x, base), p, font=f, fill=XANH_CHU + (255,), anchor="ls")
+                x += f.getlength(p)
+        return tw
+    if d.kieu == "gach":
+        yl = cy + size * 0.62
+        draw.line([(x + size * 0.1, yl), (x + tw - size * 0.1, yl)], fill=(247, 182, 205, 255), width=max(2, int(size * 0.09)))
     for p, e in d.runs:
         if e:
             im = anh_emoji(p, size * 1.15)
@@ -524,19 +583,23 @@ def nen_9_16(path, day_xuong=0):
     return im
 
 
+RONG_CHU = s(840)  # bề rộng tối đa của một dòng chữ
+
+
 def kich_thuoc_khung(dong, ty_le=1.0):
     """Cỡ chữ từng dòng, chiều cao khối chữ và chiều cao khung (đơn vị 2x)."""
-    chon_co_chu(dong, s(800), ty_le)
-    gap = s(8 * ty_le)
+    chon_co_chu(dong, RONG_CHU, ty_le)
+    gap = s(10 * ty_le)
     hc = sum(d.chieu_cao() for d in dong) + gap * (len(dong) - 1)
-    ch = max(s(360 * ty_le), int(hc / 0.56))
+    ch = max(s(330 * ty_le), int(hc / 0.64))
     return gap, hc, ch
 
 
-DAY_KHUNG = 0.985  # mép dưới tấm nền xanh, tính theo chiều cao khung
+LE_TREN = 0.14  # khoảng từ mép trên khung vẽ tới mép trên tấm nền xanh
+DAY_KHUNG = 0.9 - LE_TREN  # mép dưới tấm trắng (tấm nền xanh được phép chạm ngọn tóc)
 
 
-def xep_khung_tranh_dau(hook, y_top, dinh_dau, le=14):
+def xep_khung_tranh_dau(hook, y_top, dinh_dau, le=6):
     """Chọn tỉ lệ chữ và vị trí khung sao cho mép dưới khung nằm trên đỉnh đầu.
 
     Trả về (y_top, ty_le, do_day_anh): do_day_anh > 0 nghĩa là phải đẩy ảnh nền
@@ -546,7 +609,7 @@ def xep_khung_tranh_dau(hook, y_top, dinh_dau, le=14):
     gioi_han = dinh_dau - le
     dong = phan_tich_hook(hook)
     y_min = 24
-    for i in range(8):
+    for i in range(5):
         k = 1.0 - 0.04 * i
         _, _, ch = kich_thuoc_khung(dong, k)
         cao = ch / S * DAY_KHUNG
@@ -554,7 +617,7 @@ def xep_khung_tranh_dau(hook, y_top, dinh_dau, le=14):
             return y_top, k, 0
         if y_min + cao <= gioi_han:
             return int(gioi_han - cao), k, 0
-    k = 1.0 - 0.04 * 7
+    k = 1.0 - 0.04 * 4
     _, _, ch = kich_thuoc_khung(dong, k)
     return y_min, k, int(y_min + ch / S * DAY_KHUNG - gioi_han)
 
@@ -587,26 +650,27 @@ def tim_dinh_dau(anh):
     return int(y - 0.3 * h), int(x - 0.25 * w), int(x + 1.25 * w)
 
 
-def tao_lop_phu(hook, sao="trai", diem_nhan="tu-dong", y_top=60, ty_le=1.0):
+def tao_lop_phu(hook, sao="trai", diem_nhan="tu-dong", y_top=45, ty_le=1.0):
     dong = phan_tich_hook(hook)
     if not dong:
         raise SystemExit("Hook trống.")
     seed = int(hashlib.md5(hook.encode()).hexdigest()[:8], 16)
 
-    cw = s(1000)
+    cw = s(1040)
     gap, hc, ch = kich_thuoc_khung(dong, ty_le)
 
     layer = Image.new("RGBA", (W * S, H * S), (0, 0, 0, 0))
     x0 = (W * S - cw) // 2
-    y0 = s(y_top)
+    # y_top là mép trên tấm nền xanh; khung vẽ bắt đầu cao hơn một chút
+    y0 = int(s(y_top) - ch * LE_TREN)
 
     kf = khung_tu_file(cw, ch) or ve_khung(cw, ch)
     khung, pad = kf
     layer.alpha_composite(khung, (x0 - pad, y0 - pad))
 
     # chữ: căn giữa vùng trắng (lệch phải nhẹ vì ngôi sao ở trái)
-    cx = x0 + cw * 0.52
-    cy = y0 + ch * 0.52 - hc / 2
+    cx = x0 + cw * 0.51
+    cy = y0 + ch * 0.485 - hc / 2
     vi_tri = []
     for i, d in enumerate(dong):
         hh = d.chieu_cao()
@@ -618,27 +682,55 @@ def tao_lop_phu(hook, sao="trai", diem_nhan="tu-dong", y_top=60, ty_le=1.0):
     # điểm nhấn
     dr = ImageDraw.Draw(layer)
     chon = set(diem_nhan.split(",")) if diem_nhan != "tu-dong" else set()
-    nhan = next((v for v in vi_tri if v[0].kieu in ("vang", "hong", "the", "nen", "xanh", "to")), vi_tri[0])
+    nhan = next((v for v in vi_tri if v[0].kieu != "thuong"), None)
+    k_nhan = nhan[0].kieu if nhan else "thuong"
     if diem_nhan == "tu-dong":
-        if nhan[0].kieu == "vang":
-            chon = {"tia-vang", "lap-lanh"}
-        elif nhan[0].kieu in ("hong", "the"):
-            chon = {"tia-hong", "tim"}
-        else:
-            chon = {"lap-lanh", "bong-bong"}
+        chon = {
+            "vang": {"tia-vang", "lap-lanh"},
+            "to": {"tia-vang", "lap-lanh"},
+            "hong": {"tia-hong-goc", "tim"},
+            "the": {"tia-hong-goc", "tim"},
+            "so": {"tia-hong-goc"},
+            "gach": {"tia-hong-goc"},
+            "thuong": {"tia-hong", "lap-lanh"},
+        }.get(k_nhan, {"lap-lanh", "bong-bong"})
     if "khong" in chon:
         chon = set()
 
-    if "tia-vang" in chon:
-        d, mid, tw = nhan if nhan[0].kieu != "vang" or len(vi_tri) < 2 else vi_tri[max(0, vi_tri.index(nhan) - 1)]
-        half = tw / 2 + s(40)
-        ve_tia(dr, cx - half, mid - s(4), 180, s(46), VANG, VANG_VIEN)
-        ve_tia(dr, cx + half, mid - s(4), 0, s(46), VANG, VANG_VIEN)
-    if "tia-hong" in chon:
-        ve_tia(dr, x0 + cw * 0.86, y0 + ch * 0.2, -40, s(58), (255, 150, 190), HONG_DAM, rong=s(16), goc=30)
+    def dong_cho_tia():
+        """Dòng đặt tia hai bên: dòng nhấn mạnh (hoặc dòng trên nó nếu là vệt vàng), miễn đủ chỗ."""
+        uu_tien = []
+        if nhan:
+            i = vi_tri.index(nhan)
+            if k_nhan == "vang" and i > 0:
+                uu_tien.append(vi_tri[i - 1])
+            if k_nhan in ("to", "thuong", "vang"):
+                uu_tien.append(nhan)
+        uu_tien += sorted(vi_tri, key=lambda v: v[2])
+        for v in uu_tien:
+            if v[0].kieu in ("hong", "the", "nen", "xanh"):
+                continue
+            if v[2] / 2 + s(150) <= cw * 0.47:
+                return v
+        return None
+
+    for ten, mau in (("tia-vang", TIA_VANG), ("tia-hong", TIA_HONG)):
+        if ten in chon:
+            v = dong_cho_tia()
+            if v is None:
+                chon.add(ten + "-goc")
+                continue
+            d, mid, tw = v
+            half = tw / 2 + s(26)
+            ve_tia(layer, cx - half, mid, 180, mau)
+            ve_tia(layer, cx + half, mid, 0, mau)
+    if "tia-hong-goc" in chon:
+        ve_tia(layer, x0 + cw * 0.84, y0 + ch * 0.26, -36, TIA_HONG, dai=s(66), rong=s(12), goc=34, r0=s(18))
+    if "tia-vang-goc" in chon:
+        ve_tia(layer, x0 + cw * 0.84, y0 + ch * 0.26, -36, TIA_VANG, dai=s(66), rong=s(12), goc=34, r0=s(18))
     if "lap-lanh" in chon:
-        ve_lap_lanh(dr, x0 + cw * 0.96, y0 + ch * 0.06, s(30), VANG)
-        ve_lap_lanh(dr, x0 + cw * 0.9, y0 - s(4), s(16), (255, 255, 255))
+        ve_lap_lanh(dr, x0 + cw * 0.965, y0 + ch * 0.17, s(28), VANG)
+        ve_lap_lanh(dr, x0 + cw * 0.91, y0 + ch * 0.1, s(15), (255, 255, 255))
         ve_lap_lanh(dr, x0 + cw * 0.2, y0 + ch * 1.02, s(20), VANG)
     if "bong-bong" in chon:
         ve_bong_bong(layer, x0 + cw * 0.97, y0 + ch * 0.92, s(26))
@@ -664,8 +756,8 @@ def main():
     ap.add_argument("-o", "--out", help="file kết quả (mặc định <tên ảnh>_bia.jpg)")
     ap.add_argument("--sao", choices=["trai", "phai", "an"], default="trai", help="vị trí ngôi sao")
     ap.add_argument("--diem-nhan", default="tu-dong",
-                    help="tu-dong | khong | kết hợp: tia-vang,tia-hong,lap-lanh,bong-bong,tim")
-    ap.add_argument("--y", type=int, default=60, help="khoảng cách từ mép trên tới khung (px)")
+                    help="tu-dong | khong | kết hợp: tia-vang,tia-hong (hai bên dòng), tia-vang-goc,tia-hong-goc (góc phải), lap-lanh,bong-bong,tim")
+    ap.add_argument("--y", type=int, default=45, help="khoảng cách từ mép trên ảnh tới tấm nền xanh của khung (px)")
     ap.add_argument("--khung-trong-suot", action="store_true",
                     help="xuất thêm PNG nền trong suốt để chèn lên video (CapCut/ffmpeg)")
     ap.add_argument("--dau", type=int,

@@ -9,6 +9,8 @@ Trả lời bằng tiếng Việt. Người dùng chỉ cần gửi **ảnh + c�
 
 ## Bộ nhận diện (giữ cố định)
 
+Ảnh bìa mẫu đã duyệt nằm trong `mau/` (mau-01 … mau-10). Xem vài ảnh trong đó trước khi làm bìa đầu tiên của phiên để bám đúng phong cách.
+
 - Khổ 1080x1920 (9:16). Ảnh nền được cắt vừa khung, không méo.
 - Khung tiêu đề ở phía trên: tấm trắng viền xanh `#1890F0` nằm nghiêng trên tấm nền xanh gradient `#8CD0FC` → `#34A0F6`.
 - Ngôi sao vàng mặt cười ở góc dưới bên trái khung (có thể đổi sang phải hoặc ẩn).
@@ -30,6 +32,10 @@ Trả lời bằng tiếng Việt. Người dùng chỉ cần gửi **ảnh + c�
    | `[xanh]` | vệt cọ xanh hai bên chữ | con số, "chỉ 1 bước" |
    | `[to]` | chữ xanh cỡ rất lớn | cụm 1–3 từ, có thể kèm emoji (`TRÁI CAM 🍊`) |
    | `[nen]` | chữ trắng trên nền xanh bo tròn | lời gọi, dòng mở |
+   | `[so]` | số đầu dòng rất to (`[so] 3 SAI LẦM`) | danh sách, "3 sai lầm", "5 mẹo" |
+   | `[gach]` | gạch chân hồng mảnh dưới dòng | dòng chủ đề cuối |
+
+   Có thể gắn `[to]` cho nhiều dòng liền nhau (mẫu "CÓ CON RỒI / MỚI THẤY"). Hook chỉ 2 dòng thì thường để cả hai dòng thường: dòng đầu to, tia hồng hai bên (mẫu "MẸ CÓ BÉ GÁI").
 
    Đổi kiểu giữa các ảnh để loạt bìa không bị lặp. Không gắn thẻ thì script tự chọn.
 4. Chạy:
@@ -38,8 +44,11 @@ Trả lời bằng tiếng Việt. Người dùng chỉ cần gửi **ảnh + c�
    ```
    Tuỳ chọn:
    - `--sao trai|phai|an`: vị trí ngôi sao (ẩn khi dòng có emoji lớn hoặc chỗ trái che mặt)
-   - `--diem-nhan tu-dong|khong|tia-vang,tia-hong,lap-lanh,bong-bong,tim`: điểm nhấn quanh khung. Mặc định tự chọn theo kiểu dòng nhấn mạnh. Sản phẩm tắm gội hợp với `bong-bong`, nội dung tình cảm hợp với `tim`.
-   - `--y 60`: khoảng cách từ mép trên ảnh tới khung (px).
+   - `--diem-nhan tu-dong|khong|...`: điểm nhấn quanh khung, kết hợp bằng dấu phẩy:
+     `tia-vang`, `tia-hong` (3 tia hình nêm hai bên một dòng ngắn), `tia-vang-goc`, `tia-hong-goc` (tia ở góc trên phải khung),
+     `lap-lanh`, `bong-bong`, `tim`. Mặc định tự chọn theo kiểu dòng nhấn mạnh, giống các mẫu: vệt vàng hoặc chữ to → tia vàng hai bên;
+     hồng/thẻ/số/gạch chân → tia hồng ở góc; 2 dòng thường → tia hồng hai bên dòng đầu. Dòng có emoji lớn thường để `khong` và `--sao an`.
+   - `--y 45`: khoảng cách từ mép trên ảnh tới tấm nền xanh của khung (px).
    - `--dau Y`: toạ độ y (trên ảnh 1080x1920) của đỉnh đầu (gồm cả tóc) người trong ảnh. Dùng khi script không tự tìm thấy mặt hoặc tìm sai.
    - `--khung-trong-suot`: xuất thêm PNG trong suốt để chèn lên video trong CapCut hoặc ffmpeg.
    - Không đưa ảnh: chỉ xuất khung PNG trong suốt.

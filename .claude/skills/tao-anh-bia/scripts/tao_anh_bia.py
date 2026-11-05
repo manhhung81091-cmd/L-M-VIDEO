@@ -669,9 +669,18 @@ def nen_9_16(path, day_xuong=0):
     top = (im.height - H) // 2
     im = im.crop((left, top, left + W, top + H))
     if day_xuong > 0:
-        # đẩy ảnh xuống, phần trống phía trên lấp bằng chính ảnh làm mờ
-        mo = im.resize((W, H)).filter(ImageFilter.GaussianBlur(30))
-        mo.paste(im, (0, day_xuong))
+        # đẩy ảnh xuống; phần trống phía trên lấp bằng dải trên cùng của ảnh
+        # (thường là tường/trần trơn) kéo giãn và làm mờ nhẹ
+        dai = im.crop((0, 0, W, max(40, H // 24))).resize((W, day_xuong + 40), Image.BICUBIC)
+        dai = dai.filter(ImageFilter.GaussianBlur(12))
+        mo = im.copy()
+        mo.paste(im.crop((0, 0, W, H - day_xuong)), (0, day_xuong))
+        mo.paste(dai.crop((0, 0, W, day_xuong)), (0, 0))
+        # hoà mép nối
+        noi = 30
+        if day_xuong > noi:
+            vung = mo.crop((0, day_xuong - noi, W, day_xuong + noi))
+            mo.paste(vung.filter(ImageFilter.GaussianBlur(6)), (0, day_xuong - noi))
         im = mo
     return im
 
@@ -701,7 +710,7 @@ def xep_khung_tranh_dau(hook, y_top, dinh_dau, le=6):
         return y_top, 1.0, 0
     gioi_han = dinh_dau - le
     dong = phan_tich_hook(hook)
-    y_min = 24
+    y_min = VUNG_AN_TOAN_TREN
     for i in range(5):
         k = 1.0 - 0.04 * i
         _, _, ch = kich_thuoc_khung(dong, k)
@@ -743,7 +752,13 @@ def tim_dinh_dau(anh):
     return int(y - 0.3 * h), int(x - 0.1 * w), int(x + 1.1 * w)
 
 
-def tao_lop_phu(hook, sao="trai", diem_nhan="tu-dong", y_top=45, ty_le=1.0):
+# TikTok hiển thị ảnh bìa trên trang cá nhân dạng 3:4 (cắt ~240px trên và dưới),
+# nên khung phải nằm trong vùng này để luôn thấy trọn vẹn.
+VUNG_AN_TOAN_TREN = 270
+Y_MAC_DINH = 285
+
+
+def tao_lop_phu(hook, sao="trai", diem_nhan="tu-dong", y_top=Y_MAC_DINH, ty_le=1.0):
     dong = phan_tich_hook(hook)
     if not dong:
         raise SystemExit("Hook trống.")
@@ -863,7 +878,7 @@ def main():
     ap.add_argument("--sao", choices=["trai", "phai", "an"], default="trai", help="vị trí ngôi sao")
     ap.add_argument("--diem-nhan", default="tu-dong",
                     help="tu-dong | khong | kết hợp: tia-vang,tia-hong (hai bên dòng), tia-vang-goc,tia-hong-goc (góc phải), lap-lanh,bong-bong,tim")
-    ap.add_argument("--y", type=int, default=45, help="khoảng cách từ mép trên ảnh tới tấm nền xanh của khung (px)")
+    ap.add_argument("--y", type=int, default=Y_MAC_DINH, help="mép trên tấm nền xanh của khung (px); mặc định nằm trong vùng ảnh bìa 3:4 TikTok luôn hiển thị")
     ap.add_argument("--khung-trong-suot", action="store_true",
                     help="xuất thêm PNG nền trong suốt để chèn lên video (CapCut/ffmpeg)")
     ap.add_argument("--dau", type=int,

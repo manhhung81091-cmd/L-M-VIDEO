@@ -9,6 +9,10 @@ Trả lời bằng tiếng Việt. Người dùng chỉ cần gửi **ảnh + c�
 
 ## Bộ nhận diện (giữ cố định)
 
+- **Vùng an toàn ảnh bìa:** TikTok hiển thị ảnh bìa trên trang cá nhân dạng 3:4, cắt khoảng 240px phía trên và 240px phía dưới.
+  Khung (kể cả ngôi sao, lấp lánh) phải nằm trọn trong vùng y = 240…1680. Mặc định mép trên tấm nền xanh ở y = 285, không đặt cao hơn y = 270.
+  Khi kiểm tra, cắt thử vùng 3:4 (`crop((0, 240, 1080, 1680))`) và xem khung có trọn vẹn, cân đối không.
+
 Ảnh bìa mẫu đã duyệt nằm trong `mau/` (mau-01 … mau-10). Xem vài ảnh trong đó trước khi làm bìa đầu tiên của phiên để bám đúng phong cách.
 
 - Khổ 1080x1920 (9:16). Ảnh nền được cắt vừa khung, không méo.
@@ -50,7 +54,7 @@ Trả lời bằng tiếng Việt. Người dùng chỉ cần gửi **ảnh + c�
      `tia-vang`, `tia-hong` (3 tia hình nêm hai bên một dòng ngắn), `tia-vang-goc`, `tia-hong-goc` (tia ở góc trên phải khung),
      `lap-lanh`, `bong-bong`, `tim`. Mặc định tự chọn theo kiểu dòng nhấn mạnh, giống các mẫu: vệt vàng hoặc chữ to → chỉ lấp lánh (**không tự thêm tia vàng**: người dùng đã yêu cầu bỏ tia vàng nhiều lần, chỉ dùng khi họ yêu cầu);
      hồng/thẻ/số/gạch chân → chỉ lấp lánh (**không tự thêm tim hay tia hồng ở góc**: người dùng đã yêu cầu bỏ); 2 dòng thường → tia hồng hai bên dòng đầu. Dòng có emoji lớn thường để `khong` và `--sao an`.
-   - `--y 45`: khoảng cách từ mép trên ảnh tới tấm nền xanh của khung (px).
+   - `--y 285`: mép trên tấm nền xanh của khung (px). Không đặt nhỏ hơn 270 (sẽ bị TikTok cắt mất).
    - `--dau Y`: toạ độ y (trên ảnh 1080x1920) của đỉnh đầu (gồm cả tóc) người trong ảnh. Dùng khi script không tự tìm thấy mặt hoặc tìm sai.
    - `--khung-trong-suot`: xuất thêm PNG trong suốt để chèn lên video trong CapCut hoặc ffmpeg.
    - Không đưa ảnh: chỉ xuất khung PNG trong suốt.

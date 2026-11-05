@@ -37,6 +37,8 @@ Trả lời bằng tiếng Việt. Người dùng chỉ cần gửi **ảnh + c�
 
    Có thể gắn `[to]` cho nhiều dòng liền nhau (mẫu "CÓ CON RỒI / MỚI THẤY"). Hook chỉ 2 dòng thì thường để cả hai dòng thường: dòng đầu to, tia hồng hai bên (mẫu "MẸ CÓ BÉ GÁI").
 
+   Dòng nhấn mạnh phải **ngắn** (khoảng 15 ký tự, như "GHIỀN CÁI NÀY", "BƯỚC NÀY", "CHUA LÒM"), nếu không chữ bị thu nhỏ và mất điểm nhấn.
+   Câu dài thì tách phần còn lại sang dòng riêng; ảnh còn nhiều chỗ phía trên đầu thì dùng 4 dòng.
    Đổi kiểu giữa các ảnh để loạt bìa không bị lặp. Không gắn thẻ thì script tự chọn.
 4. Chạy:
    ```bash

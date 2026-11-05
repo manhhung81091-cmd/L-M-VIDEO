@@ -725,6 +725,19 @@ def xep_khung_tranh_dau(hook, y_top, dinh_dau, le=-25):
     return y_min, k, int(y_min + ch / S * DAY_KHUNG - gioi_han)
 
 
+def dat_khung_giua(hook, dinh_dau, le=30):
+    """Đặt khung (từ mép trên nền xanh tới mép dưới tấm trắng) ở chính giữa
+    khoảng từ mép trên ảnh tới đỉnh đầu; thu chữ nếu không đủ chỗ."""
+    dong = phan_tich_hook(hook)
+    for i in range(5):
+        k = 1.0 - 0.04 * i
+        _, _, ch = kich_thuoc_khung(dong, k)
+        cao = ch / S * DAY_KHUNG
+        if cao + 2 * le <= dinh_dau:
+            break
+    return max(le, int((dinh_dau - cao) / 2)), k, 0
+
+
 def tim_dinh_dau(anh):
     """Ước lượng toạ độ y của đỉnh đầu người trong ảnh 1080x1920 (None nếu không thấy).
 
@@ -886,6 +899,8 @@ def main():
                     help="toạ độ y (px, trên ảnh 1080x1920) của đỉnh đầu người trong ảnh; "
                          "bỏ trống để tự nhận diện khuôn mặt")
     ap.add_argument("--che-dau", action="store_true", help="tắt chế độ tránh che đầu")
+    ap.add_argument("--giua", action="store_true",
+                    help="đặt khung ở giữa mép trên ảnh và đỉnh đầu (cao hơn; có thể bị cắt một phần trên lưới 3:4 của TikTok)")
     a = ap.parse_args()
 
     y_top, ty_le, day = a.y, 1.0, 0
@@ -903,7 +918,10 @@ def main():
                     # ngôi sao luôn ở bên trái theo nhận diện; chỉ đổi khi gọi --sao
                 else:
                     print("Không tự tìm thấy khuôn mặt; nếu khung che đầu hãy chạy lại với --dau <y đỉnh đầu>.")
-        if dau is not None:
+        if dau is not None and a.giua:
+            y_top, ty_le, day = dat_khung_giua(a.hook, dau)
+            print(f"Đỉnh đầu ở y≈{dau}px → khung ở giữa: y={y_top}, cỡ chữ x{ty_le:.2f}")
+        elif dau is not None:
             y_top, ty_le, day = xep_khung_tranh_dau(a.hook, a.y, dau)
             print(f"Đỉnh đầu ở y≈{dau}px → khung đặt ở y={y_top}, cỡ chữ x{ty_le:.2f}"
                   + (f", đẩy ảnh xuống {day}px" if day else ""))

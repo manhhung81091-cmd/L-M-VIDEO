@@ -701,8 +701,9 @@ LE_TREN = 0.14  # khoảng từ mép trên khung vẽ tới mép trên tấm n�
 DAY_KHUNG = 0.9 - LE_TREN  # mép dưới tấm trắng (tấm nền xanh được phép chạm ngọn tóc)
 
 
-def xep_khung_tranh_dau(hook, y_top, dinh_dau, le=6):
-    """Chọn tỉ lệ chữ và vị trí khung sao cho mép dưới khung nằm trên đỉnh đầu.
+def xep_khung_tranh_dau(hook, y_top, dinh_dau, le=-25):
+    """Chọn tỉ lệ chữ và vị trí khung sao cho mép dưới khung nằm trên đỉnh đầu
+    (như các bìa mẫu trên kênh: khung được chạm nhẹ ngọn tóc, không che trán, le<0).
 
     Trả về (y_top, ty_le, do_day_anh): do_day_anh > 0 nghĩa là phải đẩy ảnh nền
     xuống bấy nhiêu px vì khung nhỏ nhất vẫn chạm đầu."""
@@ -749,13 +750,13 @@ def tim_dinh_dau(anh):
         return None
     x, y, w, h = max(faces, key=lambda f: f[2] * f[3])
     # khung mặt Haar bắt đầu ở trán; tóc nhô thêm khoảng 0,2-0,25 chiều cao mặt
-    return int(y - 0.3 * h), int(x - 0.1 * w), int(x + 1.1 * w)
+    return int(y - 0.22 * h), int(x - 0.1 * w), int(x + 1.1 * w)
 
 
 # TikTok hiển thị ảnh bìa trên trang cá nhân dạng 3:4 (cắt ~240px trên và dưới),
 # nên khung phải nằm trong vùng này để luôn thấy trọn vẹn.
-VUNG_AN_TOAN_TREN = 245
-Y_MAC_DINH = 250
+VUNG_AN_TOAN_TREN = 250
+Y_MAC_DINH = 258
 
 
 def tao_lop_phu(hook, sao="trai", diem_nhan="tu-dong", y_top=Y_MAC_DINH, ty_le=1.0):

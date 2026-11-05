@@ -70,3 +70,10 @@ Bỏ `:enable='lt(t,3)'` để khung hiện suốt video (3 = số giây khung h
 
 Nếu `assets/khung.png` hoặc `assets/ngoi-sao.png` tồn tại, script dùng chúng thay cho bản vẽ bằng code (xem `assets/README.md`).
 Font Open Sans nằm trong `fonts/` (giấy phép OFL), không cần cài thêm. Cần Python 3 và Pillow (`python3 -m pip install pillow`).
+
+### Icon ảnh thay cho emoji
+
+Emoji trong hook được thay bằng ảnh gốc trong `assets/` nếu có (khai báo ở `ICON_THAY_EMOJI` trong script):
+- 🍊 → `assets/icon-cam.png` (trái cam nguyên + nửa trái, dùng cho hook về mùi cam)
+
+Người dùng gửi icon mới (PNG nền trong suốt) thì cắt sát viền, lưu vào `assets/icon-<tên>.png` và thêm emoji tương ứng vào `ICON_THAY_EMOJI`.

@@ -399,7 +399,23 @@ def font_emoji():
     return None
 
 
+# Emoji được thay bằng ảnh gốc của thương hiệu trong assets/ (nếu có)
+ICON_THAY_EMOJI = {"🍊": "icon-cam.png"}
+ICON_CAO = 1.45  # icon ảnh cao gấp 1,6 lần cỡ chữ (như trái cam trong mẫu)
+
+
+def icon_asset(chuoi):
+    ten = ICON_THAY_EMOJI.get(chuoi.replace("\ufe0f", ""))
+    if ten and os.path.exists(os.path.join(ASSET_DIR, ten)):
+        return Image.open(os.path.join(ASSET_DIR, ten)).convert("RGBA")
+    return None
+
+
 def anh_emoji(chuoi, cao):
+    ic = icon_asset(chuoi)
+    if ic is not None:
+        h = int(cao / 1.15 * ICON_CAO)
+        return ic.resize((max(1, int(ic.width * h / ic.height)), h), Image.LANCZOS)
     f = font_emoji()
     if f is None:
         return None
@@ -432,6 +448,9 @@ class Dong:
         self.kieu = kieu
         parts = [p for p in EMOJI_RE.split(text) if p]
         self.runs = [(p, bool(EMOJI_RE.fullmatch(p))) for p in parts]
+        # bỏ khoảng trắng thừa sát emoji/icon để icon nằm sát chữ
+        self.runs = [((p.rstrip() if not e and i + 1 < len(self.runs) and self.runs[i + 1][1] else p), e)
+                     for i, (p, e) in enumerate(self.runs)]
         self.text = "".join(p for p, e in self.runs if not e).strip()
         self.co_emoji = any(e for _, e in self.runs)
         self.size = 0
@@ -452,7 +471,11 @@ class Dong:
             w += font(int(size * self.TI_LE_SO), True).getlength(self.so) + size * 0.22
         for p, e in self.runs:
             if e:
-                w += int(size * 1.15) + s(8) if font_emoji() else 0
+                ic = icon_asset(p)
+                if ic is not None:
+                    w += int(ic.width * size * ICON_CAO / ic.height) + s(14)
+                else:
+                    w += int(size * 1.15) + s(8) if font_emoji() else 0
             else:
                 w += f.getlength(p)
         return w
@@ -599,9 +622,9 @@ def ve_dong(layer, d, cx, cy, seed):
         if e:
             im = anh_emoji(p, size * 1.15)
             if im is not None:
-                x += s(8)
+                x += s(14) if icon_asset(p) is not None else s(8)
                 layer.alpha_composite(im, (int(x), int(cy - im.height / 2)))
-                x += int(size * 1.15)
+                x += im.width
             continue
         if d.kieu in ("hong", "the", "nen"):
             draw.text((x + s(2), cy + s(3)), p, font=f, fill=(0, 0, 0, 50), anchor="lm")

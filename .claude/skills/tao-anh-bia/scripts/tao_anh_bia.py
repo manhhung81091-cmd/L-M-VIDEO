@@ -512,7 +512,7 @@ def be_rong_hinh(d, size):
 
 
 def gioi_han(d, rong):
-    return rong + {"hong": s(50), "the": s(40), "nen": s(40), "xanh": s(130)}.get(d.kieu, 0)
+    return rong + {"hong": s(20), "the": s(0), "nen": s(10), "xanh": s(130)}.get(d.kieu, 0)
 
 
 def chon_co_chu(dong, rong_toi_da, ty_le=1.0):
@@ -700,7 +700,7 @@ def tim_dinh_dau(anh):
         return None
     x, y, w, h = max(faces, key=lambda f: f[2] * f[3])
     # khung mặt Haar bắt đầu ở trán; tóc nhô thêm khoảng 0,2-0,25 chiều cao mặt
-    return int(y - 0.3 * h), int(x - 0.25 * w), int(x + 1.25 * w)
+    return int(y - 0.3 * h), int(x - 0.1 * w), int(x + 1.1 * w)
 
 
 def tao_lop_phu(hook, sao="trai", diem_nhan="tu-dong", y_top=45, ty_le=1.0):
@@ -833,9 +833,9 @@ def main():
                 if kq:
                     dau, xt, xp = kq
                     # ngôi sao nằm ngay trên đầu thì chuyển sang phía còn lại
-                    if sao == "trai" and xt < 230:
+                    if sao == "trai" and xt < 200:
                         sao = "phai" if xp < W - 230 else sao
-                    elif sao == "phai" and xp > W - 230:
+                    elif sao == "phai" and xp > W - 200:
                         sao = "trai" if xt > 230 else sao
                 else:
                     print("Không tự tìm thấy khuôn mặt; nếu khung che đầu hãy chạy lại với --dau <y đỉnh đầu>.")

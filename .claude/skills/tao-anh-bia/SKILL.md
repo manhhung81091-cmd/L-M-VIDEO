@@ -10,7 +10,8 @@ Trả lời bằng tiếng Việt. Người dùng chỉ cần gửi **ảnh + c�
 ## Bộ nhận diện (giữ cố định)
 
 - **Cỡ và vị trí khung (người dùng chốt):** khung thu còn 90% (`TL_KHUNG = 0.9`), để khi đăng lên lưới TikTok không mất góc nào.
-  Khung nằm trong ô 3:4, căn giữa mép trên ô và đỉnh đầu; không dùng `--giua` nữa (cách đó làm mất dòng đầu trên lưới).
+  Khung nằm trong ô 3:4 và **không dính sát đầu**: khoảng trống từ mép trên ô (y=240) tới khung bằng khoảng trống từ khung tới đỉnh tóc,
+  mỗi bên ít nhất 40px. Thiếu chỗ thì thu chữ (tối đa còn 80%), rồi đẩy ảnh xuống. Không dùng `--giua` (làm mất dòng đầu trên lưới).
 - **Vùng an toàn ảnh bìa:** TikTok hiển thị ảnh bìa trên trang cá nhân dạng 3:4, cắt khoảng 240px phía trên và 240px phía dưới.
   Khung (kể cả ngôi sao, lấp lánh) phải nằm trọn trong vùng y = 240…1680. Mặc định mép trên tấm nền xanh ở y = 258, không đặt cao hơn y = 250: trên lưới TikTok khung nằm sát mép trên ô, thấy trọn viền xanh, giống ảnh chụp trang kênh của người dùng. Khung được chạm nhẹ ngọn tóc nhưng không che trán.
   Khi kiểm tra, cắt thử vùng 3:4 (`crop((0, 240, 1080, 1680))`) và xem khung có trọn vẹn, cân đối không.

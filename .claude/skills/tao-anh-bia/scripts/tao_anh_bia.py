@@ -703,30 +703,30 @@ LE_TREN = 0.14  # khoảng từ mép trên khung vẽ tới mép trên tấm n�
 DAY_KHUNG = 0.9 - LE_TREN  # mép dưới tấm trắng (tấm nền xanh được phép chạm ngọn tóc)
 
 
-def xep_khung_tranh_dau(hook, y_top, dinh_dau, le=-25):
-    """Chọn tỉ lệ chữ và vị trí khung sao cho mép dưới khung nằm trên đỉnh đầu
-    (như các bìa mẫu trên kênh: khung được chạm nhẹ ngọn tóc, không che trán, le<0).
+O_TREN = 240        # mép trên ô ảnh bìa 3:4 trên lưới TikTok
+KHOANG_CACH = 40    # khoảng trống tối thiểu: mép ô → khung và khung → đỉnh đầu
+CAO_KHUNG = 1 - LE_TREN - 0.02  # mép dưới tấm nền xanh, tính từ y_top, theo chiều cao khung
 
-    Trả về (y_top, ty_le, do_day_anh): do_day_anh > 0 nghĩa là phải đẩy ảnh nền
-    xuống bấy nhiêu px vì khung nhỏ nhất vẫn chạm đầu."""
+
+def xep_khung_tranh_dau(hook, y_top, dinh_dau, le=None):
+    """Đặt khung cân đối trong ô ảnh bìa: khoảng trống từ mép trên ô tới khung
+    bằng khoảng trống từ khung tới đỉnh đầu (ít nhất KHOANG_CACH mỗi bên).
+
+    Thiếu chỗ thì thu nhỏ chữ (tối đa còn 80%), vẫn thiếu thì đẩy ảnh xuống.
+    Trả về (y_top, ty_le, do_day_anh)."""
     if dinh_dau is None:
         return y_top, 1.0, 0
-    gioi_han = dinh_dau - le
     dong = phan_tich_hook(hook)
-    y_min = VUNG_AN_TOAN_TREN
-    for i in range(5):
+    cho = dinh_dau - O_TREN
+    for i in range(6):
         k = 1.0 - 0.04 * i
         _, _, ch = kich_thuoc_khung(dong, k)
-        cao = ch / S * DAY_KHUNG
-        if y_top + cao <= gioi_han:
-            # căn khung giữa mép trên ô ảnh bìa (y=240) và đỉnh đầu, không thấp quá
-            giua = int((240 + gioi_han - cao) / 2)
-            return max(y_top, min(giua, Y_THAP_NHAT)), k, 0
-        if y_min + cao <= gioi_han:
-            return int(gioi_han - cao), k, 0
-    k = 1.0 - 0.04 * 4
-    _, _, ch = kich_thuoc_khung(dong, k)
-    return y_min, k, int(y_min + ch / S * DAY_KHUNG - gioi_han)
+        cao = ch / S * CAO_KHUNG
+        if cho - cao >= 2 * KHOANG_CACH:
+            le_moi_ben = min((cho - cao) / 2, 110)  # nhiều chỗ thì khung vẫn ở phía trên
+            return int(O_TREN + le_moi_ben), k, 0
+    day = int(cao + 2 * KHOANG_CACH - cho)
+    return O_TREN + KHOANG_CACH, k, day
 
 
 def dat_khung_giua(hook, dinh_dau, le=30):

@@ -420,7 +420,7 @@ def gioi_han(d, rong):
     return rong + {"hong": s(50), "the": s(40), "nen": s(40), "xanh": s(130)}.get(d.kieu, 0)
 
 
-def chon_co_chu(dong, rong_toi_da):
+def chon_co_chu(dong, rong_toi_da, ty_le=1.0):
     n = len(dong)
     for i, d in enumerate(dong):
         if d.kieu == "to":
@@ -431,7 +431,7 @@ def chon_co_chu(dong, rong_toi_da):
             base = 66
         else:
             base = 50 if n >= 3 else 58
-        size = s(base)
+        size = s(base * ty_le)
         while be_rong_hinh(d, size) > gioi_han(d, rong_toi_da) and size > s(28):
             size -= s(1)
         d.size = size
@@ -499,7 +499,7 @@ def ve_dong(layer, d, cx, cy, seed):
 
 
 # ------------------------------------------------------------------ ghép
-def nen_9_16(path):
+def nen_9_16(path, day_xuong=0):
     ext = os.path.splitext(path)[1].lower()
     if ext in (".mp4", ".mov", ".m4v", ".mkv", ".webm"):
         raise SystemExit("Hãy đưa ảnh (jpg/png). Với video, lấy 1 khung hình bằng ffmpeg trước: "
@@ -515,21 +515,86 @@ def nen_9_16(path):
     im = im.resize((math.ceil(im.width * r), math.ceil(im.height * r)), Image.LANCZOS)
     left = (im.width - W) // 2
     top = (im.height - H) // 2
-    return im.crop((left, top, left + W, top + H))
+    im = im.crop((left, top, left + W, top + H))
+    if day_xuong > 0:
+        # đẩy ảnh xuống, phần trống phía trên lấp bằng chính ảnh làm mờ
+        mo = im.resize((W, H)).filter(ImageFilter.GaussianBlur(30))
+        mo.paste(im, (0, day_xuong))
+        im = mo
+    return im
 
 
-def tao_lop_phu(hook, sao="trai", diem_nhan="tu-dong", y_top=60):
+def kich_thuoc_khung(dong, ty_le=1.0):
+    """Cỡ chữ từng dòng, chiều cao khối chữ và chiều cao khung (đơn vị 2x)."""
+    chon_co_chu(dong, s(800), ty_le)
+    gap = s(8 * ty_le)
+    hc = sum(d.chieu_cao() for d in dong) + gap * (len(dong) - 1)
+    ch = max(s(360 * ty_le), int(hc / 0.56))
+    return gap, hc, ch
+
+
+DAY_KHUNG = 0.985  # mép dưới tấm nền xanh, tính theo chiều cao khung
+
+
+def xep_khung_tranh_dau(hook, y_top, dinh_dau, le=14):
+    """Chọn tỉ lệ chữ và vị trí khung sao cho mép dưới khung nằm trên đỉnh đầu.
+
+    Trả về (y_top, ty_le, do_day_anh): do_day_anh > 0 nghĩa là phải đẩy ảnh nền
+    xuống bấy nhiêu px vì khung nhỏ nhất vẫn chạm đầu."""
+    if dinh_dau is None:
+        return y_top, 1.0, 0
+    gioi_han = dinh_dau - le
+    dong = phan_tich_hook(hook)
+    y_min = 24
+    for i in range(8):
+        k = 1.0 - 0.04 * i
+        _, _, ch = kich_thuoc_khung(dong, k)
+        cao = ch / S * DAY_KHUNG
+        if y_top + cao <= gioi_han:
+            return y_top, k, 0
+        if y_min + cao <= gioi_han:
+            return int(gioi_han - cao), k, 0
+    k = 1.0 - 0.04 * 7
+    _, _, ch = kich_thuoc_khung(dong, k)
+    return y_min, k, int(y_min + ch / S * DAY_KHUNG - gioi_han)
+
+
+def tim_dinh_dau(anh):
+    """Ước lượng toạ độ y của đỉnh đầu người trong ảnh 1080x1920 (None nếu không thấy).
+
+    Cần OpenCV (pip install opencv-python-headless). Trả về (y_dinh_dau, x_trai, x_phai)."""
+    try:
+        import cv2
+        import numpy as np
+    except ImportError:
+        return None
+    if not hasattr(cv2, "CascadeClassifier"):  # OpenCV 5 bỏ Haar; cần opencv-python-headless<5
+        return None
+    g = cv2.cvtColor(np.array(anh.convert("RGB")), cv2.COLOR_RGB2GRAY)
+    g = cv2.equalizeHist(g)
+    faces = []
+    for name in ("haarcascade_frontalface_default.xml", "haarcascade_profileface.xml"):
+        cas = cv2.CascadeClassifier(os.path.join(cv2.data.haarcascades, name))
+        for (x, y, w, h) in cas.detectMultiScale(g, 1.1, 6, minSize=(110, 110)):
+            if y < H * 0.75:
+                faces.append((x, y, w, h))
+        if faces:
+            break
+    if not faces:
+        return None
+    x, y, w, h = max(faces, key=lambda f: f[2] * f[3])
+    # khung mặt Haar bắt đầu ở trán; tóc nhô thêm khoảng 0,2-0,25 chiều cao mặt
+    return int(y - 0.3 * h), int(x - 0.25 * w), int(x + 1.25 * w)
+
+
+def tao_lop_phu(hook, sao="trai", diem_nhan="tu-dong", y_top=60, ty_le=1.0):
     dong = phan_tich_hook(hook)
     if not dong:
         raise SystemExit("Hook trống.")
     seed = int(hashlib.md5(hook.encode()).hexdigest()[:8], 16)
 
     cw = s(1000)
-    rong_chu = s(800)
-    chon_co_chu(dong, rong_chu)
-    gap = s(8)
-    hc = sum(d.chieu_cao() for d in dong) + gap * (len(dong) - 1)
-    ch = max(s(360), int(hc / 0.56))
+    gap, hc, ch = kich_thuoc_khung(dong, ty_le)
 
     layer = Image.new("RGBA", (W * S, H * S), (0, 0, 0, 0))
     x0 = (W * S - cw) // 2
@@ -584,7 +649,7 @@ def tao_lop_phu(hook, sao="trai", diem_nhan="tu-dong", y_top=60):
         ve_tim(dr, x0 + cw * 0.14, y0 + ch * 0.02, s(12), (255, 180, 205))
 
     if sao != "an":
-        st = ve_ngoi_sao(s(190))
+        st = ve_ngoi_sao(s(190 * max(ty_le, 0.85)))
         sx = x0 - s(40) if sao == "trai" else x0 + cw - st.width + s(40)
         sy = int(y0 + ch * 0.86 - st.height / 2)
         layer.alpha_composite(st, (int(sx), sy))
@@ -603,13 +668,43 @@ def main():
     ap.add_argument("--y", type=int, default=60, help="khoảng cách từ mép trên tới khung (px)")
     ap.add_argument("--khung-trong-suot", action="store_true",
                     help="xuất thêm PNG nền trong suốt để chèn lên video (CapCut/ffmpeg)")
+    ap.add_argument("--dau", type=int,
+                    help="toạ độ y (px, trên ảnh 1080x1920) của đỉnh đầu người trong ảnh; "
+                         "bỏ trống để tự nhận diện khuôn mặt")
+    ap.add_argument("--che-dau", action="store_true", help="tắt chế độ tránh che đầu")
     a = ap.parse_args()
 
-    lop = tao_lop_phu(a.hook, a.sao, a.diem_nhan, a.y)
+    y_top, ty_le, day = a.y, 1.0, 0
+    sao = a.sao
+    if a.anh:
+        nen = nen_9_16(a.anh)
+        dau = None
+        if not a.che_dau:
+            if a.dau is not None:
+                dau = a.dau
+            else:
+                kq = tim_dinh_dau(nen)
+                if kq:
+                    dau, xt, xp = kq
+                    # ngôi sao nằm ngay trên đầu thì chuyển sang phía còn lại
+                    if sao == "trai" and xt < 230:
+                        sao = "phai" if xp < W - 230 else sao
+                    elif sao == "phai" and xp > W - 230:
+                        sao = "trai" if xt > 230 else sao
+                else:
+                    print("Không tự tìm thấy khuôn mặt; nếu khung che đầu hãy chạy lại với --dau <y đỉnh đầu>.")
+        if dau is not None:
+            y_top, ty_le, day = xep_khung_tranh_dau(a.hook, a.y, dau)
+            print(f"Đỉnh đầu ở y≈{dau}px → khung đặt ở y={y_top}, cỡ chữ x{ty_le:.2f}"
+                  + (f", đẩy ảnh xuống {day}px" if day else ""))
+            if day:
+                nen = nen_9_16(a.anh, day)
+
+    lop = tao_lop_phu(a.hook, sao, a.diem_nhan, y_top, ty_le)
     if a.anh:
         base = os.path.splitext(a.anh)[0]
         out = a.out or base + "_bia.jpg"
-        nen = nen_9_16(a.anh).convert("RGBA")
+        nen = nen.convert("RGBA")
         nen.alpha_composite(lop)
         nen.convert("RGB").save(out, quality=95)
         print("Đã lưu ảnh bìa:", out)

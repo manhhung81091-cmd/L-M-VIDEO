@@ -39,10 +39,14 @@ Trả lời bằng tiếng Việt. Người dùng chỉ cần gửi **ảnh + c�
    Tuỳ chọn:
    - `--sao trai|phai|an`: vị trí ngôi sao (ẩn khi dòng có emoji lớn hoặc chỗ trái che mặt)
    - `--diem-nhan tu-dong|khong|tia-vang,tia-hong,lap-lanh,bong-bong,tim`: điểm nhấn quanh khung. Mặc định tự chọn theo kiểu dòng nhấn mạnh. Sản phẩm tắm gội hợp với `bong-bong`, nội dung tình cảm hợp với `tim`.
-   - `--y 60`: đẩy khung xuống (px) nếu khung che mặt hoặc sản phẩm.
+   - `--y 60`: khoảng cách từ mép trên ảnh tới khung (px).
+   - `--dau Y`: toạ độ y (trên ảnh 1080x1920) của đỉnh đầu (gồm cả tóc) người trong ảnh. Dùng khi script không tự tìm thấy mặt hoặc tìm sai.
    - `--khung-trong-suot`: xuất thêm PNG trong suốt để chèn lên video trong CapCut hoặc ffmpeg.
    - Không đưa ảnh: chỉ xuất khung PNG trong suốt.
-5. **Xem lại ảnh kết quả** (mở file bằng Read). Kiểm tra: khung không che mặt hay sản phẩm chính, chữ không tràn khung, dấu tiếng Việt đủ. Nếu che thì chỉnh `--y` hoặc `--sao`, chạy lại.
+   **Không được che đầu người trong ảnh.** Script tự nhận diện khuôn mặt (cần `python3 -m pip install "opencv-python-headless<5"`),
+   rồi kéo khung lên cao, thu nhỏ chữ (tối đa còn 72%), và nếu vẫn chạm thì đẩy ảnh nền xuống, để mép dưới khung nằm trên đỉnh tóc.
+   Ngôi sao tự chuyển sang phía không có đầu. Dòng in ra "Đỉnh đầu ở y≈…" cho biết kết quả nhận diện.
+5. **Xem lại ảnh kết quả** (mở file bằng Read). Kiểm tra: khung và ngôi sao không che đầu, mặt hay sản phẩm chính, chữ không tràn khung, dấu tiếng Việt đủ. Nếu vẫn che, nhìn ảnh gốc để ước lượng y của đỉnh tóc rồi chạy lại với `--dau Y` (và `--sao` nếu cần).
 6. Gửi ảnh cho người dùng (SendUserFile) và nói ngắn gọn đã chọn kiểu nhấn mạnh nào. Lưu file kết quả cạnh ảnh gốc, không ghi đè ảnh gốc.
 
 ## Chèn khung lên video

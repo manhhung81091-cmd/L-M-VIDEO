@@ -17,7 +17,7 @@ Trả lời bằng tiếng Việt. Người dùng chỉ cần gửi **ảnh + c�
 
 - Khổ 1080x1920 (9:16). Ảnh nền được cắt vừa khung, không méo.
 - Khung tiêu đề ở phía trên: tấm trắng viền xanh `#1890F0` nằm nghiêng trên tấm nền xanh gradient `#8CD0FC` → `#34A0F6`.
-- Ngôi sao vàng mặt cười ở góc dưới bên trái khung (có thể đổi sang phải hoặc ẩn).
+- Ngôi sao vàng mặt cười **luôn ở góc dưới bên trái** khung (đúng nhận diện; chỉ ẩn khi dòng có icon lớn như trái cam).
 - Chữ: Open Sans đậm, IN HOA, màu xanh `#1E9BE9`. Thường 2–3 dòng: dòng mở, **một dòng nhấn mạnh**, dòng phụ nhỏ hơn.
 - Màu nhấn: hồng `#F48FB4`, vàng `#FFD62E`.
 

@@ -899,11 +899,7 @@ def main():
                 kq = tim_dinh_dau(nen)
                 if kq:
                     dau, xt, xp = kq
-                    # ngôi sao nằm ngay trên đầu thì chuyển sang phía còn lại
-                    if sao == "trai" and xt < 200:
-                        sao = "phai" if xp < W - 230 else sao
-                    elif sao == "phai" and xp > W - 200:
-                        sao = "trai" if xt > 230 else sao
+                    # ngôi sao luôn ở bên trái theo nhận diện; chỉ đổi khi gọi --sao
                 else:
                     print("Không tự tìm thấy khuôn mặt; nếu khung che đầu hãy chạy lại với --dau <y đỉnh đầu>.")
         if dau is not None:

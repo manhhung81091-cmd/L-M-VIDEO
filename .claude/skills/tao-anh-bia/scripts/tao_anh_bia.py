@@ -779,10 +779,11 @@ def tao_lop_phu(hook, sao="trai", diem_nhan="tu-dong", y_top=45, ty_le=1.0):
             # người dùng không thích tia vàng: chỉ dùng khi gọi rõ --diem-nhan tia-vang
             "vang": {"lap-lanh"},
             "to": {"lap-lanh"},
-            "hong": {"tia-hong-goc", "tim"},
-            "the": {"tia-hong-goc", "tim"},
-            "so": {"tia-hong-goc"},
-            "gach": {"tia-hong-goc"},
+            # người dùng đã bỏ tim và tia hồng ở góc: không tự thêm
+            "hong": {"lap-lanh"},
+            "the": {"lap-lanh"},
+            "so": {"lap-lanh"},
+            "gach": {"lap-lanh"},
             "thuong": {"tia-hong", "lap-lanh"},
         }.get(k_nhan, {"lap-lanh", "bong-bong"})
     if "khong" in chon:

@@ -47,7 +47,7 @@ Trả lời bằng tiếng Việt. Người dùng chỉ cần gửi **ảnh + c�
    - `--diem-nhan tu-dong|khong|...`: điểm nhấn quanh khung, kết hợp bằng dấu phẩy:
      `tia-vang`, `tia-hong` (3 tia hình nêm hai bên một dòng ngắn), `tia-vang-goc`, `tia-hong-goc` (tia ở góc trên phải khung),
      `lap-lanh`, `bong-bong`, `tim`. Mặc định tự chọn theo kiểu dòng nhấn mạnh, giống các mẫu: vệt vàng hoặc chữ to → chỉ lấp lánh (**không tự thêm tia vàng**: người dùng đã yêu cầu bỏ tia vàng nhiều lần, chỉ dùng khi họ yêu cầu);
-     hồng/thẻ/số/gạch chân → tia hồng ở góc; 2 dòng thường → tia hồng hai bên dòng đầu. Dòng có emoji lớn thường để `khong` và `--sao an`.
+     hồng/thẻ/số/gạch chân → chỉ lấp lánh (**không tự thêm tim hay tia hồng ở góc**: người dùng đã yêu cầu bỏ); 2 dòng thường → tia hồng hai bên dòng đầu. Dòng có emoji lớn thường để `khong` và `--sao an`.
    - `--y 45`: khoảng cách từ mép trên ảnh tới tấm nền xanh của khung (px).
    - `--dau Y`: toạ độ y (trên ảnh 1080x1920) của đỉnh đầu (gồm cả tóc) người trong ảnh. Dùng khi script không tự tìm thấy mặt hoặc tìm sai.
    - `--khung-trong-suot`: xuất thêm PNG trong suốt để chèn lên video trong CapCut hoặc ffmpeg.

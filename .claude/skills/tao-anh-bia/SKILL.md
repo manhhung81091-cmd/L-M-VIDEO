@@ -12,9 +12,9 @@ Trả lời bằng tiếng Việt. Người dùng chỉ cần gửi **ảnh + c�
 1. **Kích thước:** 1080x1920 (9:16), JPG, đúng chuẩn ảnh bìa TikTok.
 2. **Khung không bị mất trên lưới TikTok:** trang cá nhân hiện ảnh bìa dạng 3:4 (bỏ ~240px trên và dưới).
    Khung, chữ, ngôi sao, lấp lánh phải nằm trọn trong vùng y = 240…1680. Kiểm tra bằng `crop((0, 240, 1080, 1680))`.
-3. **Khung gọn:** thu còn 90% (`TL_KHUNG = 0.9`), hai bên chừa lề, không sát mép ô.
+3. **Khung to như mẫu gốc:** rộng gần hết ảnh (`TL_KHUNG = 1.0`), chữ to. Bản 90% chữ nhỏ bị người dùng chê "khung xấu".
 4. **Cân đối, không dính sát đầu:** khoảng trống từ mép trên ô (y=240) tới khung = khoảng trống từ khung tới đỉnh tóc,
-   mỗi bên ≥ 40px (`KHOANG_CACH`). Thiếu chỗ thì thu chữ (tối đa còn 80%), rồi đẩy ảnh xuống (lấp phía trên bằng mảng tường của ảnh).
+   mỗi bên ≥ 30px (`KHOANG_CACH`). Thiếu chỗ thì thu chữ nhẹ (tối thiểu 88%), còn lại đẩy ảnh xuống (lấp phía trên bằng mảng tường của ảnh).
    Đây là mặc định của script; **không** dùng `--giua` và không đặt `--y` nhỏ hơn 250.
 5. **Ngôi sao luôn ở góc dưới bên trái khung.** Không tự chuyển sang phải.
 6. **Điểm nhấn trang trí:** chỉ ngôi sao + lấp lánh nhỏ. Không tự thêm tia vàng, tim, tia hồng ở góc (người dùng đã bỏ nhiều lần).

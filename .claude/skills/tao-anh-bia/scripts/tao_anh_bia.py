@@ -529,7 +529,7 @@ def be_rong_hinh(d, size):
         "hong": tw * 1.12 + size * 1.3,
         "the": tw + size * 1.75,
         "nen": tw + size * 1.2,
-        "vang": tw + size * 1.2,
+        "vang": tw,
         "xanh": tw + size * 3.2,
     }.get(d.kieu, tw)
 
@@ -609,8 +609,10 @@ def ve_dong(layer, d, cx, cy, seed):
         draw.rounded_rectangle([cx - bw / 2, cy - bh / 2, cx + bw / 2, cy + bh / 2], radius=bh / 2, fill=XANH_CHU + (255,))
         mau_chu = (255, 255, 255)
     elif d.kieu == "vang":
-        ve_net_co(layer, cx - tw / 2 - size * 0.6, cx + tw / 2 + size * 0.6, cy + size * 0.08, size * 0.85, (255, 230, 80), seed, 18)
-        ve_net_co(layer, cx - tw / 2 - size * 0.3, cx + tw / 2 + size * 0.3, cy + size * 0.15, size * 0.5, (250, 175, 160), seed + 1, 6)
+        # dải bút dạ vàng rộng như mẫu, lót một lớp hồng cam mỏng phía dưới
+        rong_dai = max(tw / 2 + size * 1.4, RONG_CHU * 0.42)
+        ve_net_co(layer, cx - rong_dai, cx + rong_dai, cy + size * 0.12, size * 0.5, (250, 175, 160), seed + 1, 8)
+        ve_net_co(layer, cx - rong_dai, cx + rong_dai, cy + size * 0.05, size * 0.95, (255, 232, 90), seed, 24)
     elif d.kieu == "xanh":
         for side in (-1, 1):
             inner = cx + side * (tw / 2 - size * 0.25)
@@ -686,7 +688,7 @@ def nen_9_16(path, day_xuong=0):
 
 
 # Cỡ khung so với bản gốc: 0.9 để khung gọn, không sát mép ô ảnh bìa TikTok
-TL_KHUNG = 0.9
+TL_KHUNG = 1.0
 RONG_CHU = s(840 * TL_KHUNG)  # bề rộng tối đa của một dòng chữ
 
 
@@ -704,7 +706,7 @@ DAY_KHUNG = 0.9 - LE_TREN  # mép dưới tấm trắng (tấm nền xanh đư�
 
 
 O_TREN = 240        # mép trên ô ảnh bìa 3:4 trên lưới TikTok
-KHOANG_CACH = 40    # khoảng trống tối thiểu: mép ô → khung và khung → đỉnh đầu
+KHOANG_CACH = 30    # khoảng trống tối thiểu: mép ô → khung và khung → đỉnh đầu
 CAO_KHUNG = 1 - LE_TREN - 0.02  # mép dưới tấm nền xanh, tính từ y_top, theo chiều cao khung
 
 
@@ -718,7 +720,8 @@ def xep_khung_tranh_dau(hook, y_top, dinh_dau, le=None):
         return y_top, 1.0, 0
     dong = phan_tich_hook(hook)
     cho = dinh_dau - O_TREN
-    for i in range(6):
+    # giữ chữ to như mẫu (tối thiểu 88%); thiếu chỗ thì đẩy ảnh xuống thay vì thu chữ
+    for i in range(4):
         k = 1.0 - 0.04 * i
         _, _, ch = kich_thuoc_khung(dong, k)
         cao = ch / S * CAO_KHUNG
@@ -885,7 +888,7 @@ def tao_lop_phu(hook, sao="trai", diem_nhan="tu-dong", y_top=Y_MAC_DINH, ty_le=1
     if sao != "an":
         st = ve_ngoi_sao(s(190 * TL_KHUNG * max(ty_le, 0.85)))
         # giữ trọn ngôi sao trong ảnh, cách mép 10px
-        sx = x0 - s(45) if sao == "trai" else x0 + cw - st.width + s(45)
+        sx = max(s(4), x0 - s(45)) if sao == "trai" else min(W * S - st.width - s(4), x0 + cw - st.width + s(45))
         sy = int(y0 + ch * 0.9 - st.height / 2)
         layer.alpha_composite(st, (int(sx), sy))
 

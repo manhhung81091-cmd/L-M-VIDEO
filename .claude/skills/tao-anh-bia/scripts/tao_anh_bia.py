@@ -907,6 +907,8 @@ def main():
                     help="toạ độ y (px, trên ảnh 1080x1920) của đỉnh đầu người trong ảnh; "
                          "bỏ trống để tự nhận diện khuôn mặt")
     ap.add_argument("--che-dau", action="store_true", help="tắt chế độ tránh che đầu")
+    ap.add_argument("--nhich", type=int, default=0,
+                    help="nhích khung lên (số dương) hoặc xuống (số âm) bấy nhiêu px sau khi tự đặt; không lên quá y=250")
     ap.add_argument("--giua", action="store_true",
                     help="đặt khung ở giữa mép trên ảnh và đỉnh đầu (cao hơn; có thể bị cắt một phần trên lưới 3:4 của TikTok)")
     a = ap.parse_args()
@@ -936,6 +938,8 @@ def main():
             if day:
                 nen = nen_9_16(a.anh, day)
 
+    if a.nhich:
+        y_top = max(VUNG_AN_TOAN_TREN, y_top - a.nhich)
     lop = tao_lop_phu(a.hook, sao, a.diem_nhan, y_top, ty_le)
     if a.anh:
         base = os.path.splitext(a.anh)[0]

@@ -19,9 +19,11 @@ Trả lời bằng tiếng Việt. Người dùng chỉ cần gửi **ảnh + c�
 5. **Ngôi sao luôn ở góc dưới bên trái khung.** Không tự chuyển sang phải.
 6. **Điểm nhấn trang trí:** chỉ ngôi sao + lấp lánh nhỏ. Không tự thêm tia vàng, tim, tia hồng ở góc (người dùng đã bỏ nhiều lần).
    Tia chỉ dùng khi người dùng yêu cầu (`--diem-nhan tia-vang` …).
-7. **Dòng nhấn mạnh:** ngắn (~15 ký tự). Ưu tiên `[the]` (thẻ hồng), `[vang]`, `[xanh]`, `[to]`, `[gach]`, `[so]`.
+7. **Khung phải có điểm nhấn, không một màu:** người dùng chê khung chỉ có chữ xanh + một vệt nhạt. Dùng 2 điểm nhấn khác màu,
+   ví dụ thẻ hồng `[the]` cho ý gây tò mò + vệt vàng `[vang]` cho ý trả lời. Dòng có vệt không để ở cuối cùng (bị đẩy lệch vì ngôi sao).
+8. **Dòng nhấn mạnh:** ngắn (~15 ký tự). Ưu tiên `[the]` (thẻ hồng), `[vang]`, `[xanh]`, `[to]`, `[gach]`, `[so]`.
    Hạn chế `[hong]` (bầu dục hồng): người dùng từng yêu cầu bỏ. Khi người dùng muốn "màu hồng" thì dùng `[the]`.
-8. **Sau khi làm:** xem lại cả ảnh đầy đủ và bản cắt 3:4; lưu vào `anh-bia/<ten>_bia.jpg`, commit + push, gửi ảnh cho người dùng.
+9. **Sau khi làm:** xem lại cả ảnh đầy đủ và bản cắt 3:4; lưu vào `anh-bia/<ten>_bia.jpg`, commit + push, gửi ảnh cho người dùng.
 
 ## Bộ nhận diện (giữ cố định)
 

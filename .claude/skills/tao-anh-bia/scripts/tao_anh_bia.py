@@ -52,7 +52,7 @@ VANG = (255, 214, 46)            # #FFD62E
 VANG_VIEN = (242, 165, 22)
 VIEN_TOI = (45, 45, 45)
 
-KIEU = {"to", "hong", "the", "vang", "xanh", "nen", "so", "gach"}
+KIEU = {"to", "hong", "the", "vang", "vethong", "xanh", "nen", "so", "gach"}
 KIEU_TU_DONG = ["hong", "the", "vang", "xanh"]
 
 # Hình khung theo ảnh mẫu (toạ độ trên khung 2000x1000).
@@ -482,7 +482,7 @@ class Dong:
 
     @property
     def dam(self):
-        return self.kieu in ("to", "hong", "the", "nen", "vang", "xanh", "so")
+        return self.kieu in ("to", "hong", "the", "nen", "vang", "vethong", "xanh", "so")
 
     def chieu_cao(self):
         if self.kieu in ("hong", "the", "nen"):
@@ -530,6 +530,7 @@ def be_rong_hinh(d, size):
         "the": tw + size * 1.75,
         "nen": tw + size * 1.2,
         "vang": tw,
+        "vethong": tw,
         "xanh": tw + size * 3.2,
     }.get(d.kieu, tw)
 
@@ -548,7 +549,7 @@ def chon_co_chu(dong, rong_toi_da, ty_le=1.0):
             base = 100
         elif d.kieu == "so":
             base = 84
-        elif d.kieu in ("hong", "the", "nen", "vang", "xanh"):
+        elif d.kieu in ("hong", "the", "nen", "vang", "vethong", "xanh"):
             base = 76
         elif i == 0:
             base = 70
@@ -613,6 +614,11 @@ def ve_dong(layer, d, cx, cy, seed):
         rong_dai = max(tw / 2 + size * 1.4, RONG_CHU * 0.42)
         ve_net_co(layer, cx - rong_dai, cx + rong_dai, cy + size * 0.12, size * 0.5, (250, 175, 160), seed + 1, 8)
         ve_net_co(layer, cx - rong_dai, cx + rong_dai, cy + size * 0.05, size * 0.95, (255, 232, 90), seed, 24)
+    elif d.kieu == "vethong":
+        # vệt bút dạ hồng (hợp nội dung về bọt vệ sinh màu hồng)
+        rong_dai = max(tw / 2 + size * 1.4, RONG_CHU * 0.42)
+        ve_net_co(layer, cx - rong_dai, cx + rong_dai, cy + size * 0.12, size * 0.5, (250, 150, 185), seed + 1, 8)
+        ve_net_co(layer, cx - rong_dai, cx + rong_dai, cy + size * 0.05, size * 0.95, (255, 196, 220), seed, 24)
     elif d.kieu == "xanh":
         for side in (-1, 1):
             inner = cx + side * (tw / 2 - size * 0.25)

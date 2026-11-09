@@ -45,6 +45,7 @@ Trả lời bằng tiếng Việt. Người dùng chỉ cần gửi **ảnh + c�
    | `[hong]` | chữ trắng trong hình bầu dục hồng | cảm xúc, "ghiền", "mê" |
    | `[the]` | chữ trắng trong thẻ hồng xiên | công dụng, tên tính năng |
    | `[vang]` | vệt bút dạ vàng sau chữ | câu hỏi, điều bất ngờ |
+   | `[vethong]` | vệt bút dạ hồng sau chữ | nội dung về bọt vệ sinh (chai hồng); người dùng thích dùng thay vệt vàng khi nói về bọt |
    | `[xanh]` | vệt cọ xanh hai bên chữ | con số, "chỉ 1 bước" |
    | `[to]` | chữ xanh cỡ rất lớn | cụm 1–3 từ, có thể kèm emoji (`TRÁI CAM 🍊`) |
    | `[nen]` | chữ trắng trên nền xanh bo tròn | lời gọi, dòng mở |

@@ -789,7 +789,30 @@ Y_THAP_NHAT = 330  # khi còn nhiều chỗ, khung không xuống thấp hơn m�
 Y_MAC_DINH = 258
 
 
-def tao_lop_phu(hook, sao="trai", diem_nhan="tu-dong", y_top=Y_MAC_DINH, ty_le=1.0):
+def sticker(chuoi, cao):
+    """Emoji (hoặc icon ảnh trong assets) thành sticker: viền trắng dày + bóng nhẹ."""
+    im = anh_emoji(chuoi, cao)
+    if im is None:
+        return None
+    pad = int(cao * 0.12)
+    w, h = im.width + 2 * pad, im.height + 2 * pad
+    base = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    base.alpha_composite(im, (pad, pad))
+    a = base.getchannel("A")
+    vien = a.filter(ImageFilter.MaxFilter(int(pad * 0.9) * 2 + 1)).filter(ImageFilter.GaussianBlur(1.5))
+    bong = vien.filter(ImageFilter.GaussianBlur(pad * 0.6))
+    out = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    to_mau(out, bong, (40, 90, 160), 70)
+    to_mau(out, vien, (255, 255, 255))
+    out.alpha_composite(base)
+    return out
+
+
+# vị trí icon quanh khung: (tỉ lệ x theo bề rộng khung, tỉ lệ y theo chiều cao khung, cỡ, góc xoay)
+VI_TRI_ICON = [(0.04, 0.14, 115, -10), (0.98, 0.84, 100, 10), (0.99, 0.12, 95, 12)]
+
+
+def tao_lop_phu(hook, sao="trai", diem_nhan="tu-dong", y_top=Y_MAC_DINH, ty_le=1.0, icons=()):
     dong = phan_tich_hook(hook)
     if not dong:
         raise SystemExit("Hook trống.")
@@ -892,6 +915,17 @@ def tao_lop_phu(hook, sao="trai", diem_nhan="tu-dong", y_top=Y_MAC_DINH, ty_le=1
         ve_tim(dr, x0 + cw * 0.08, y0 + ch * 0.12, s(20), HONG)
         ve_tim(dr, x0 + cw * 0.14, y0 + ch * 0.02, s(12), (255, 180, 205))
 
+    for chuoi, (fx, fy, cao, goc) in zip(icons, VI_TRI_ICON):
+        st_ic = sticker(chuoi, s(cao))
+        if st_ic is None:
+            continue
+        st_ic = st_ic.rotate(goc, resample=Image.BICUBIC, expand=True)
+        px = int(x0 + cw * fx - st_ic.width / 2)
+        py = int(y0 + ch * fy - st_ic.height / 2)
+        px = max(s(4), min(W * S - st_ic.width - s(4), px))
+        py = max(s(O_TREN + 4), py)
+        layer.alpha_composite(st_ic, (px, py))
+
     if sao != "an":
         st = ve_ngoi_sao(s(190 * TL_KHUNG * max(ty_le, 0.85)))
         # giữ trọn ngôi sao trong ảnh, cách mép 10px
@@ -917,6 +951,8 @@ def main():
                     help="toạ độ y (px, trên ảnh 1080x1920) của đỉnh đầu người trong ảnh; "
                          "bỏ trống để tự nhận diện khuôn mặt")
     ap.add_argument("--che-dau", action="store_true", help="tắt chế độ tránh che đầu")
+    ap.add_argument("--icon", default="",
+                    help="tối đa 3 emoji/icon dạng sticker quanh khung, cách nhau bằng dấu phẩy: góc trên trái, góc dưới phải, góc trên phải")
     ap.add_argument("--nhich", type=int, default=0,
                     help="nhích khung lên (số dương) hoặc xuống (số âm) bấy nhiêu px sau khi tự đặt; không lên quá y=250")
     ap.add_argument("--giua", action="store_true",
@@ -950,7 +986,7 @@ def main():
 
     if a.nhich:
         y_top = max(VUNG_AN_TOAN_TREN, y_top - a.nhich)
-    lop = tao_lop_phu(a.hook, sao, a.diem_nhan, y_top, ty_le)
+    lop = tao_lop_phu(a.hook, sao, a.diem_nhan, y_top, ty_le, [x.strip() for x in a.icon.split(",") if x.strip()])
     if a.anh:
         base = os.path.splitext(a.anh)[0]
         out = a.out or base + "_bia.jpg"

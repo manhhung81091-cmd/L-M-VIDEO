@@ -17,10 +17,13 @@ Trả lời bằng tiếng Việt. Người dùng chỉ cần gửi **ảnh + c�
    mỗi bên ≥ 30px (`KHOANG_CACH`). Thiếu chỗ thì thu chữ nhẹ (tối thiểu 88%), còn lại đẩy ảnh xuống (lấp phía trên bằng mảng tường của ảnh).
    Đây là mặc định của script; **không** dùng `--giua` và không đặt `--y` nhỏ hơn 250.
 5. **Ngôi sao luôn ở góc dưới bên trái khung.** Không tự chuyển sang phải.
-6. **Điểm nhấn trang trí:** chỉ ngôi sao + lấp lánh nhỏ. Không tự thêm tia vàng, tim, tia hồng ở góc (người dùng đã bỏ nhiều lần).
-   Tia chỉ dùng khi người dùng yêu cầu (`--diem-nhan tia-vang` …).
-7. **Khung phải có điểm nhấn, không một màu:** người dùng chê khung chỉ có chữ xanh + một vệt nhạt. Dùng 2 điểm nhấn khác màu,
-   ưu tiên chữ to `[to]` + thẻ hồng `[the]`. Hạn chế vệt vàng `[vang]` (người dùng đã yêu cầu bỏ ở bìa "Từ ngày con ăn dặm"). Dòng có vệt không để ở cuối cùng (bị đẩy lệch vì ngôi sao).
+6. **Thiết kế theo nội dung, không theo một khuôn:** giữ cố định khung (tấm trắng viền xanh, nền xanh), ngôi sao bên trái
+   và màu nhận diện (xanh `#1E9BE9`, hồng, vàng). Còn kiểu dòng nhấn mạnh và icon thì **chọn theo nội dung từng video**,
+   không lặp mãi thẻ hồng + vệt vàng (người dùng chê "như nhau, đơn điệu").
+7. **Icon sticker cho bắt mắt:** dùng `--icon "🥣,😱"` (tối đa 3, viền trắng như sticker, đặt góc trên trái, góc dưới phải, góc trên phải).
+   Chọn icon khớp nội dung: ăn dặm 🥣🍼, bất ngờ/lo lắng 😱😭, mùi thơm 🌸🍊, tắm/bọt 🛁🫧, đi học 🎒, bơi 💦🏊, quà 🎁, trời lạnh ❄️, mẹo/ý hay 💡, cảnh báo ⚠️, đúng/sai ✅❌.
+   Không tự thêm tia vàng, tim, tia hồng vẽ bằng code (người dùng đã bỏ); dùng `--diem-nhan khong` khi đã có icon.
+   Xem lại để icon không đè chữ.
 8. **Dòng nhấn mạnh:** ngắn (~15 ký tự). Ưu tiên `[the]` (thẻ hồng), `[vang]`, `[xanh]`, `[to]`, `[gach]`, `[so]`.
    Hạn chế `[hong]` (bầu dục hồng): người dùng từng yêu cầu bỏ. Khi người dùng muốn "màu hồng" thì dùng `[the]`.
 9. **Sau khi làm:** xem lại cả ảnh đầy đủ và bản cắt 3:4; lưu vào `anh-bia/<ten>_bia.jpg`, commit + push, gửi ảnh cho người dùng.

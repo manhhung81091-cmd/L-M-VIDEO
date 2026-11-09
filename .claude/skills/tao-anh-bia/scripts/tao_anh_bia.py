@@ -834,7 +834,7 @@ def tao_lop_phu(hook, sao="trai", diem_nhan="tu-dong", y_top=Y_MAC_DINH, ty_le=1
             "the": {"lap-lanh"},
             "so": {"lap-lanh"},
             "gach": {"lap-lanh"},
-            "thuong": {"tia-hong", "lap-lanh"},
+            "thuong": {"lap-lanh"},
         }.get(k_nhan, {"lap-lanh", "bong-bong"})
     if "khong" in chon:
         chon = set()

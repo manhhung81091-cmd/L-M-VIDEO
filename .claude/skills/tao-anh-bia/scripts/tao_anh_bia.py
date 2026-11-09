@@ -837,6 +837,7 @@ def tao_lop_phu(hook, sao="trai", diem_nhan="tu-dong", y_top=Y_MAC_DINH, ty_le=1
         chon = {
             # người dùng không thích tia vàng: chỉ dùng khi gọi rõ --diem-nhan tia-vang
             "vang": {"lap-lanh"},
+            "vethong": {"lap-lanh"},
             "to": {"lap-lanh"},
             # người dùng đã bỏ tim và tia hồng ở góc: không tự thêm
             "hong": {"lap-lanh"},

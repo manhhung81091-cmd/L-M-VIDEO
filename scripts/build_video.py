@@ -164,7 +164,7 @@ def title_png(path, base, top, big, sub=None, size=84):
     bg = base.filter(ImageFilter.GaussianBlur(14))
     bg = Image.blend(bg, Image.new("RGB", (W, H), (60, 8, 10)), 0.6)
     d = ImageDraw.Draw(bg)
-    lines = textwrap.wrap(big, 32)
+    lines = textwrap.wrap(big, 40)
     lh = int(size * 1.25)
     total = 70 + lh * len(lines) + (80 if sub else 0)
     y = (H - total) / 2
@@ -365,6 +365,9 @@ def main():
     run(["ffmpeg", "-y", *args, "-filter_complex", g, "-map", "0:v", "-map", "[a]",
          "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-t", f"{total:.2f}",
          "-movflags", "+faststart", FINAL])
+    preview = FINAL.replace(".mp4", "_xem_thu_720p.mp4")
+    run(["ffmpeg", "-y", "-i", FINAL, "-vf", "scale=1280:720", "-c:v", "libx264", "-preset",
+         "veryfast", "-crf", "27", "-c:a", "aac", "-b:a", "128k", "-movflags", "+faststart", preview])
     print(f"Nhạc: {used}")
     print(f"HOÀN THÀNH: {FINAL}  ({probe_dur(FINAL)/60:.2f} phút)")
 

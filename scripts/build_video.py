@@ -19,7 +19,7 @@ import textwrap
 import wave
 
 import numpy as np
-from PIL import Image, ImageDraw, ImageFilter, ImageFont
+from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageOps
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 IMG = os.path.join(ROOT, "media", "images")
@@ -30,7 +30,7 @@ WORK = os.path.join(OUT, "work")
 FINAL = os.path.join(OUT, "ngay_hoi_dai_doan_ket_2026.mp4")
 
 W, H, FPS = 1920, 1080, 30
-TARGET = 15 * 60          # độ dài mong muốn (giây)
+TARGET = 15 * 60 + 30         # độ dài mong muốn (giây)
 COVER, TITLE, OUTRO, CARD = 12.0, 8.0, 12.0, 6.0
 XF = 1.2                  # độ dài mỗi hiệu ứng chuyển cảnh
 
@@ -65,6 +65,22 @@ SECTIONS = [
     ("Uống nước nhớ nguồn – Đền ơn đáp nghĩa", [
         (n, TRI_AN[i % len(TRI_AN)]) for i, n in enumerate(
             [1, 24, 2, 3, 4, 5, 7, 8, 9, 17, 18, 21, 22, 25, 27, 28, 29, 30])
+    ]),
+    ("Tương thân tương ái – Lá lành đùm lá rách", [
+        ("tham_01.jpg", "Thăm hỏi, động viên người bị bệnh hiểm nghèo"),
+        ("tham_02.jpg", "Trao quà hỗ trợ gia đình khó khăn, neo đơn"),
+        ("tham_03.jpg", "Chia sẻ, động viên người cao tuổi neo đơn"),
+        ("tham_04.jpg", "Ân cần thăm hỏi, động viên gia đình có hoàn cảnh khó khăn"),
+    ]),
+    ("An ninh trật tự – Chung tay cùng dân ứng phó mưa lũ", [
+        ("tham_05.jpg", "Tổ bảo vệ an ninh, trật tự thôn Trung Thành giúp dân di chuyển đồ đạc, ngày 17/9/2026"),
+        ("tham_06.jpg", "Tuần tra, nắm tình hình ngập úng trong mưa lớn"),
+        ("tham_07.jpg", "Khẩn trương ứng phó mưa lũ trên đồng ruộng"),
+        ("tham_09.jpg", "Giúp nhân dân kê, di dời tài sản khỏi nước ngập"),
+        ("tham_10.jpg", "Chung tay cùng bà con chống ngập"),
+        ("tham_11.jpg", "Hỗ trợ di dời tài sản lên nơi cao ráo"),
+        ("tham_12.jpg", "Lội nước kiểm tra các hộ dân vùng trũng"),
+        ("tham_13.jpg", "Bám địa bàn, sẵn sàng hỗ trợ nhân dân"),
     ]),
     ("Mặt trận và các đoàn thể chung sức, đồng lòng", [
         (34, "Lễ kết nạp hội viên – kỷ niệm 96 năm Ngày thành lập Hội Nông dân Việt Nam"),
@@ -116,9 +132,13 @@ def font(path, size):
     return ImageFont.truetype(path, size)
 
 
+def is_photo(it):
+    return isinstance(it, int) or not it.lower().endswith(".mp4")
+
+
 def load_photo(n):
     name = n if isinstance(n, str) else f"{n}.jpg"
-    im = Image.open(os.path.join(IMG, name)).convert("RGB")
+    im = ImageOps.exif_transpose(Image.open(os.path.join(IMG, name))).convert("RGB")
     return im.crop(CROPS[n]) if n in CROPS else im
 
 
@@ -273,8 +293,8 @@ def main():
     if music_files():  # clip dài đúng bằng các bài hát nối lại
         target = sum(probe_dur(f) for f in music_files()) - 4 * (len(music_files()) - 1)
         print(f"Độ dài theo nhạc: {target/60:.2f} phút")
-    photos = [it for _, items in SECTIONS for it, _ in items if isinstance(it, int)]
-    clips = [it for _, items in SECTIONS for it, _ in items if isinstance(it, str)]
+    photos = [it for _, items in SECTIONS for it, _ in items if is_photo(it)]
+    clips = [it for _, items in SECTIONS for it, _ in items if not is_photo(it)]
     vid_total = sum(probe_dur(os.path.join(VID, c)) for c in clips)
     n_segs = 3 + len(SECTIONS) + len(photos) + len(clips)       # bìa, tựa, kết + thẻ phần + …
     fixed = COVER + TITLE + OUTRO + CARD * len(SECTIONS) + vid_total
@@ -299,7 +319,7 @@ def main():
 
     k = 2
     for si, (name, items) in enumerate(SECTIONS, 1):
-        first = next(it for it, _ in items if isinstance(it, int))
+        first = next(it for it, _ in items if is_photo(it))
         p = os.path.join(WORK, f"card{si}.png")
         title_png(p, compose(load_photo(first)), f"PHẦN {si}", name)
         o = os.path.join(WORK, f"s{si}00_card.mp4")
@@ -309,8 +329,8 @@ def main():
             cap = os.path.join(WORK, f"cap{si}_{j}.png")
             caption_png(cap, name, text)
             o = os.path.join(WORK, f"s{si}{j:02d}.mp4")
-            if isinstance(it, int):
-                still = os.path.join(WORK, f"img{it}.png")
+            if is_photo(it):
+                still = os.path.join(WORK, f"img_{os.path.splitext(str(it))[0]}.png")
                 compose(load_photo(it)).save(still)
                 photo_seg(o, still, cap, pd, k)
                 k += 1

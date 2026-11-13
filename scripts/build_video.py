@@ -180,11 +180,34 @@ def caption_png(path, label, text):
     ov.save(path)
 
 
+def balanced_lines(d, text, f, maxw):
+    """Chia tiêu đề thành ít dòng nhất, các dòng dài gần bằng nhau, không tràn khung."""
+    words = text.split()
+    for n in range(1, len(words) + 1):
+        best = None
+        def split(ws, k):
+            if k == 1:
+                yield [" ".join(ws)]
+                return
+            for i in range(1, len(ws) - k + 2):
+                for rest in split(ws[i:], k - 1):
+                    yield [" ".join(ws[:i])] + rest
+        for cand in split(words, n):
+            if any(c.startswith("–") for c in cand[1:]):
+                continue  # không để dấu gạch ngang đầu dòng
+            widths = [d.textlength(c, font=f) for c in cand]
+            if max(widths) <= maxw and (best is None or max(widths) < best[0]):
+                best = (max(widths), cand)
+        if best:
+            return best[1]
+    return words
+
+
 def title_png(path, base, top, big, sub=None, size=84):
     bg = base.filter(ImageFilter.GaussianBlur(14))
     bg = Image.blend(bg, Image.new("RGB", (W, H), (60, 8, 10)), 0.6)
     d = ImageDraw.Draw(bg)
-    lines = textwrap.wrap(big, 40)
+    lines = balanced_lines(d, big, font(FONT_T, size), W - 240)
     lh = int(size * 1.25)
     total = 70 + lh * len(lines) + (80 if sub else 0)
     y = (H - total) / 2
@@ -211,6 +234,8 @@ ENC = ["-an", "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-pix_fmt"
 
 
 def photo_seg(out, still, cap, dur, k):
+    if os.environ.get("REUSE") and cap and os.path.exists(out):
+        return  # dùng lại đoạn ảnh đã dựng (chỉ dựng lại thẻ tiêu đề)
     n = int(round(dur * FPS))
     z, x, y = (s.format(n=n) for s in KB[k % len(KB)])
     g = f"[0]scale={W*2}:{H*2},zoompan=z='{z}':x='{x}':y='{y}':d={n}:s={W}x{H}:fps={FPS}"
@@ -222,6 +247,8 @@ def photo_seg(out, still, cap, dur, k):
 
 
 def video_seg(out, src, cap, dur):
+    if os.environ.get("REUSE") and os.path.exists(out):
+        return
     g = (f"[0:v]scale={W}:{H}:force_original_aspect_ratio=decrease,pad={W}:{H}:(ow-iw)/2:(oh-ih)/2,"
          f"setsar=1,fps={FPS}[v];[1]format=rgba,fade=in:st=1.2:d=0.8:alpha=1,"
          f"fade=out:st=7:d=1:alpha=1[c];[v][c]overlay,format=yuv420p[o]")

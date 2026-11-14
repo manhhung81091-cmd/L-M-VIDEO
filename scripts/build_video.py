@@ -314,67 +314,126 @@ def music_bed(path, dur):
 
 
 # ---------------------------------------------------------------- dựng
+# Mỗi bài hát là một "chương": các phần ảnh được xếp theo ý nghĩa lời bài hát,
+# và thời lượng ảnh trong chương được tính để đổi phần đúng lúc đổi bài.
+CHAPTERS = [
+    ("01_", ["Đảng bộ – hạt nhân của khối đại đoàn kết",
+             "Mặt trận và các đoàn thể chung sức, đồng lòng",
+             "An ninh trật tự – Chung tay cùng dân ứng phó mưa lũ"]),
+    ("02_", ["Uống nước nhớ nguồn – Đền ơn đáp nghĩa",
+             "Tương thân tương ái – Lá lành đùm lá rách"]),
+    ("03_", ["Tuổi trẻ vững bước tiến vào kỷ nguyên mới",
+             "Văn hóa làng – Đêm hội Trăng rằm"]),
+    ("04_", ["Phụ nữ Hậu Lộc tự tin, khỏe, đẹp",
+             "Chung tay xây dựng thôn xanh – sạch – đẹp",
+             "MONTAGE"]),
+]
+MONTAGE_TITLE = "Thôn Trung Thành – Chung sức, đồng lòng, vững bước tương lai"
+MONTAGE_SHOT = 6.0   # mỗi ảnh trong đoạn lướt nhanh cuối clip
+PHOTO_TARGET = 12.0  # thời lượng ảnh mong muốn ở chương cuối
+
+
 def main():
     os.makedirs(WORK, exist_ok=True)
-    target = TARGET
-    if music_files():  # clip dài đúng bằng các bài hát nối lại
-        target = sum(probe_dur(f) for f in music_files()) - 4 * (len(music_files()) - 1)
-        print(f"Độ dài theo nhạc: {target/60:.2f} phút")
-    photos = [it for _, items in SECTIONS for it, _ in items if is_photo(it)]
-    clips = [it for _, items in SECTIONS for it, _ in items if not is_photo(it)]
-    vid_total = sum(probe_dur(os.path.join(VID, c)) for c in clips)
-    n_segs = 3 + len(SECTIONS) + len(photos) + len(clips)       # bìa, tựa, kết + thẻ phần + …
-    fixed = COVER + TITLE + OUTRO + CARD * len(SECTIONS) + vid_total
-    pd = round((target + XF * (n_segs - 1) - fixed) / len(photos), 2)
-    print(f"{len(photos)} ảnh × {pd}s, {len(clips)} video ({vid_total:.0f}s), {n_segs} cảnh")
+    songs = music_files()
+    sec = dict(SECTIONS)
+    if songs and len(songs) == len(CHAPTERS):
+        lens = [probe_dur(f) for f in songs]
+    else:  # chưa đủ nhạc: chia đều độ dài mặc định
+        lens = [TARGET / len(CHAPTERS) + 4] * len(CHAPTERS)
+    all_photos = [it for _, items in SECTIONS for it, _ in items if is_photo(it)]
 
-    segs = []  # (file, duration, audio_src or None)
+    # ---- lập kế hoạch từng chương
+    plan, num = [], 0
+    for ci, (_, names) in enumerate(CHAPTERS):
+        last = ci == len(CHAPTERS) - 1
+        span = lens[ci] - (XF if last else 4)       # 4s = crossfade giữa hai bài
+        ents = []
+        if ci == 0:
+            ents += [("cover", COVER), ("title", TITLE)]
+        for name in names:
+            if name == "MONTAGE":
+                ents.append(("card", CARD, "Nhìn lại", MONTAGE_TITLE))
+                ents.append(("montage",))
+                continue
+            num += 1
+            ents.append(("card", CARD, f"PHẦN {num}", name))
+            for it, text in sec[name]:
+                if is_photo(it):
+                    ents.append(("photo", None, it, text, name))
+                else:
+                    ents.append(("video", probe_dur(os.path.join(VID, it)), it, text, name))
+        if last:
+            ents.append(("outro", OUTRO))
+        n_ph = sum(e[0] == "photo" for e in ents)
+        fixed = sum(e[1] for e in ents if e[0] in ("cover", "title", "card", "video", "outro"))
+        n_fixed = sum(e[0] != "montage" for e in ents)
+        n_m = 0
+        if any(e[0] == "montage" for e in ents):
+            # số ảnh lướt nhanh để ảnh thường ở chương này dài khoảng PHOTO_TARGET giây
+            n_m = max(0, round((span + XF * n_fixed - fixed - n_ph * PHOTO_TARGET)
+                               / (MONTAGE_SHOT - XF)))
+            step = len(all_photos) / max(n_m, 1)
+            picks = [all_photos[int(i * step)] for i in range(n_m)]
+            i = next(i for i, e in enumerate(ents) if e[0] == "montage")
+            ents[i:i + 1] = [("mshot", MONTAGE_SHOT, it) for it in picks]
+            fixed += n_m * MONTAGE_SHOT
+        pd = (span + XF * (n_fixed + n_m) - fixed) / n_ph
+        print(f"Chương {ci+1}: {lens[ci]/60:.2f} phút, {n_ph} ảnh × {pd:.1f}s"
+              + (f", {n_m} ảnh lướt nhanh" if n_m else ""), flush=True)
+        plan.append((ents, pd))
 
+    # ---- dựng từng cảnh
+    segs, k = [], 0  # (file, duration, audio_src or None)
     cover = load_photo("cover.jpg")
-    p = os.path.join(WORK, "cover.png")
-    compose(cover, dim=0.25).save(p)
-    o = os.path.join(WORK, "s000_cover.mp4")
-    photo_seg(o, p, None, COVER, 0)
-    segs.append((o, COVER, None))
-
-    p = os.path.join(WORK, "title.png")
-    title_png(p, compose(load_photo(42)), "THÔN TRUNG THÀNH – XÃ HẬU LỘC – TỈNH THANH HÓA",
-              "Ngày hội Đại đoàn kết toàn dân tộc", "Ngày Văn hóa Việt Nam • 15/11/2026", size=80)
-    o = os.path.join(WORK, "s001_title.mp4")
-    photo_seg(o, p, None, TITLE, 1)
-    segs.append((o, TITLE, None))
-
-    k = 2
-    for si, (name, items) in enumerate(SECTIONS, 1):
-        first = next(it for it, _ in items if is_photo(it))
-        p = os.path.join(WORK, f"card{si}.png")
-        title_png(p, compose(load_photo(first)), f"PHẦN {si}", name)
-        o = os.path.join(WORK, f"s{si}00_card.mp4")
-        photo_seg(o, p, None, CARD, 0)
-        segs.append((o, CARD, None))
-        for j, (it, text) in enumerate(items, 1):
-            cap = os.path.join(WORK, f"cap{si}_{j}.png")
-            caption_png(cap, name, text)
-            o = os.path.join(WORK, f"s{si}{j:02d}.mp4")
-            if is_photo(it):
+    for ci, (ents, pd) in enumerate(plan, 1):
+        for j, e in enumerate(ents):
+            o = os.path.join(WORK, f"c{ci}_{j:03d}_{e[0]}.mp4")
+            kind = e[0]
+            if kind == "cover":
+                p = os.path.join(WORK, "cover.png")
+                compose(cover, dim=0.25).save(p)
+                photo_seg(o, p, None, COVER, 0)
+                segs.append((o, COVER, None))
+            elif kind == "title":
+                p = os.path.join(WORK, "title.png")
+                title_png(p, compose(load_photo(42)), "THÔN TRUNG THÀNH – XÃ HẬU LỘC – TỈNH THANH HÓA",
+                          "Ngày hội Đại đoàn kết toàn dân tộc", "Ngày Văn hóa Việt Nam • 15/11/2026", size=80)
+                photo_seg(o, p, None, TITLE, 1)
+                segs.append((o, TITLE, None))
+            elif kind == "card":
+                nxt = next((x for x in ents[j + 1:] if x[0] in ("photo", "mshot")), None)
+                base = compose(load_photo(nxt[2] if nxt else 42))
+                p = os.path.join(WORK, f"card_{ci}_{j}.png")
+                title_png(p, base, e[2].upper(), e[3])
+                photo_seg(o, p, None, CARD, 0)
+                segs.append((o, CARD, None))
+            elif kind in ("photo", "mshot"):
+                it = e[2]
                 still = os.path.join(WORK, f"img_{os.path.splitext(str(it))[0]}.png")
-                compose(load_photo(it)).save(still)
-                photo_seg(o, still, cap, pd, k)
+                if not os.path.exists(still):
+                    compose(load_photo(it)).save(still)
+                cap = None
+                if kind == "photo":
+                    cap = os.path.join(WORK, f"cap_{ci}_{j}.png")
+                    caption_png(cap, e[4], e[3])
+                d = pd if kind == "photo" else MONTAGE_SHOT
+                photo_seg(o, still, cap, d, k)
                 k += 1
-                segs.append((o, pd, None))
-            else:
-                src = os.path.join(VID, it)
-                d = probe_dur(src)
-                video_seg(o, src, cap, d)
-                segs.append((o, d, src))
-            print(f"  xong {os.path.basename(o)}", flush=True)
-
-    p = os.path.join(WORK, "outro.png")
-    title_png(p, compose(cover), "THÔN TRUNG THÀNH – XÃ HẬU LỘC",
-              "Đoàn kết – Đổi mới – Sáng tạo", "Xây dựng quê hương giàu đẹp", size=80)
-    o = os.path.join(WORK, "s999_outro.mp4")
-    photo_seg(o, p, None, OUTRO, 1)
-    segs.append((o, OUTRO, None))
+                segs.append((o, d, None))
+            elif kind == "video":
+                cap = os.path.join(WORK, f"cap_{ci}_{j}.png")
+                caption_png(cap, e[4], e[3])
+                src = os.path.join(VID, e[2])
+                video_seg(o, src, cap, e[1])
+                segs.append((o, e[1], src))
+            elif kind == "outro":
+                p = os.path.join(WORK, "outro.png")
+                title_png(p, compose(cover), "THÔN TRUNG THÀNH – XÃ HẬU LỘC",
+                          "Đoàn kết – Đổi mới – Sáng tạo", "Xây dựng quê hương giàu đẹp", size=80)
+                photo_seg(o, p, None, OUTRO, 1)
+                segs.append((o, OUTRO, None))
+        print(f"  xong chương {ci}", flush=True)
 
     # ---- ghép hình bằng các hiệu ứng chuyển cảnh xfade
     args, g, starts = [], "", []

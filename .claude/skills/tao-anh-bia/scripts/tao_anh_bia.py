@@ -809,7 +809,7 @@ def sticker(chuoi, cao):
 
 
 # vị trí icon quanh khung: (tỉ lệ x theo bề rộng khung, tỉ lệ y theo chiều cao khung, cỡ, góc xoay)
-VI_TRI_ICON = [(0.01, 0.02, 105, -10), (0.98, 0.84, 100, 10), (0.99, 0.12, 95, 12)]
+VI_TRI_ICON = [(-0.01, 0.04, 90, -10), (0.98, 0.84, 100, 10), (1.02, 0.06, 88, 12)]
 
 
 def tao_lop_phu(hook, sao="trai", diem_nhan="tu-dong", y_top=Y_MAC_DINH, ty_le=1.0, icons=()):

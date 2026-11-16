@@ -23,7 +23,7 @@ Trả lời bằng tiếng Việt. Người dùng chỉ cần gửi **ảnh + c�
 7. **Icon sticker cho bắt mắt:** dùng `--icon "🥣,😱"` (tối đa 3, viền trắng như sticker, đặt góc trên trái, góc dưới phải, góc trên phải).
    Chọn icon khớp nội dung: ăn dặm 🥣🍼, bất ngờ/lo lắng 😱😭, mùi thơm 🌸🍊, tắm/bọt 🛁🫧, đi học 🎒, bơi 💦🏊, quà 🎁, trời lạnh ❄️, mẹo/ý hay 💡, cảnh báo ⚠️, đúng/sai ✅❌.
    Không tự thêm tia vàng, tim, tia hồng vẽ bằng code (người dùng đã bỏ); dùng `--diem-nhan khong` khi đã có icon.
-   Xem lại để icon không đè chữ.
+   Xem lại để icon không đè chữ. Dòng đầu dài thì bỏ trống góc trên trái bằng `-`, ví dụ `--icon=-,🥰,🛁` (viết liền dấu =).
 8. **Dòng nhấn mạnh:** ngắn (~15 ký tự). Ưu tiên `[the]` (thẻ hồng), `[vang]`, `[xanh]`, `[to]`, `[gach]`, `[so]`.
    Hạn chế `[hong]` (bầu dục hồng): người dùng từng yêu cầu bỏ. Khi người dùng muốn "màu hồng" thì dùng `[the]`.
 9. **Sau khi làm:** xem lại cả ảnh đầy đủ và bản cắt 3:4; lưu vào `anh-bia/<ten>_bia.jpg`, commit + push, gửi ảnh cho người dùng.

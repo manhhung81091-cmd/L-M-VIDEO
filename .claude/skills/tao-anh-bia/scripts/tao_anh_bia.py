@@ -809,7 +809,7 @@ def sticker(chuoi, cao):
 
 
 # vị trí icon quanh khung: (tỉ lệ x theo bề rộng khung, tỉ lệ y theo chiều cao khung, cỡ, góc xoay)
-VI_TRI_ICON = [(0.04, 0.14, 115, -10), (0.98, 0.84, 100, 10), (0.99, 0.12, 95, 12)]
+VI_TRI_ICON = [(0.01, 0.02, 105, -10), (0.98, 0.84, 100, 10), (0.99, 0.12, 95, 12)]
 
 
 def tao_lop_phu(hook, sao="trai", diem_nhan="tu-dong", y_top=Y_MAC_DINH, ty_le=1.0, icons=()):
@@ -916,7 +916,7 @@ def tao_lop_phu(hook, sao="trai", diem_nhan="tu-dong", y_top=Y_MAC_DINH, ty_le=1
         ve_tim(dr, x0 + cw * 0.14, y0 + ch * 0.02, s(12), (255, 180, 205))
 
     for chuoi, (fx, fy, cao, goc) in zip(icons, VI_TRI_ICON):
-        st_ic = sticker(chuoi, s(cao))
+        st_ic = None if chuoi == "-" else sticker(chuoi, s(cao))  # "-" = bỏ trống vị trí này
         if st_ic is None:
             continue
         st_ic = st_ic.rotate(goc, resample=Image.BICUBIC, expand=True)
@@ -952,7 +952,7 @@ def main():
                          "bỏ trống để tự nhận diện khuôn mặt")
     ap.add_argument("--che-dau", action="store_true", help="tắt chế độ tránh che đầu")
     ap.add_argument("--icon", default="",
-                    help="tối đa 3 emoji/icon dạng sticker quanh khung, cách nhau bằng dấu phẩy: góc trên trái, góc dưới phải, góc trên phải")
+                    help="tối đa 3 emoji/icon dạng sticker quanh khung, cách nhau bằng dấu phẩy: góc trên trái, góc dưới phải, góc trên phải; dùng - để bỏ trống một vị trí")
     ap.add_argument("--nhich", type=int, default=0,
                     help="nhích khung lên (số dương) hoặc xuống (số âm) bấy nhiêu px sau khi tự đặt; không lên quá y=250")
     ap.add_argument("--giua", action="store_true",

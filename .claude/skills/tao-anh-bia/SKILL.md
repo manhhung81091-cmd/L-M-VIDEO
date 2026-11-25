@@ -41,7 +41,11 @@ Trả lời bằng tiếng Việt. Người dùng chỉ cần gửi **ảnh + c�
 ## Cách làm
 
 1. Lấy đường dẫn ảnh người dùng gửi (ảnh tải lên nằm trong thư mục `images/` mà hệ thống báo, hoặc file trong repo).
-   Nếu là video: `ffmpeg -ss 1 -i video.mp4 -frames:v 1 anh.jpg` rồi dùng ảnh đó.
+   Nếu là video: **không lấy khung bừa**. Chạy
+   `python3 .claude/skills/tao-anh-bia/scripts/chon_khung.py video.mp4 -o thu_muc --top 8`
+   (chấm điểm rõ nét, mắt mở, đang cười), mở `thu_muc/_luoi.jpg` và tự chọn khung có biểu cảm tươi, tự nhiên:
+   mắt mở, cười, không nhăn mặt, không méo miệng khi đang nói, không nhòe; ưu tiên khung thấy sản phẩm.
+   Người dùng đã chê "biểu cảm xấu" khi khung được lấy ngẫu nhiên.
 2. Chia hook thành 2–3 dòng ngắn (mỗi dòng tối đa khoảng 30 ký tự), giữ nguyên chữ người dùng viết, chỉ sửa chính tả nếu sai rõ ràng.
 3. Chọn **một** dòng nhấn mạnh (cụm từ gây tò mò hoặc lợi ích chính) và gắn thẻ kiểu:
 
